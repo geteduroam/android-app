@@ -26,7 +26,7 @@ use, except if there is only one, then no choice is presented. If the profile ha
 `eapconfig_endpoint` field, the .eap-config is downloaded from that URL, without any authentication.
 If the profile also has an `token_endpoint` and `authorization_endpoint`, the application will start
 an OAuth Authorization Code Flow, and then download the `.eap-config` file from `eapconfig_endpoint`
-and presenting the access token as a Bearer token in an authorization header.
+and present the access token as a Bearer token in an authorization header.
 
 When the downloaded `.eap-config` file does not contain enough credentials the user must be prompted
 for username/password as these are not contained in the file itself. This happens for the
@@ -62,13 +62,13 @@ connectivity [...]. On Android 11 and higher, the Settings Intent API enables yo
 approve adding a saved network or Passpoint configuration."
 
 * Android >= Android 11 (API 30) use an intent with action `ACTION_WIFI_ADD_NETWORKS` (
-  avaialble only starting from API 30). Pass the `WifiNetworkSuggestion` including passpoint
+  available only starting from API 30). Pass the `WifiNetworkSuggestion` including passpoint
   configuration if available to the intent bundle.
 
 
 * Android == Android 10 (API 29) the Wifi Suggestion API is available, but not
-  the `ACTION_WIFI_ADD_NETWORKS` for the intent, therefor must use
-  `WifiManager.addNetworkSuggestions(wifiNetworkSuggestions)`. List must including the passpoint
+  the `ACTION_WIFI_ADD_NETWORKS` for the intent, therefore must use
+  `WifiManager.addNetworkSuggestions(wifiNetworkSuggestions)`. List must include the passpoint
   configuration. To ensure we don't duplicate networks, any previously added suggestions need to be
   removed before hand. These calls may change the networks state and the permission
   for `CHANGE_WIFI_STATE` is required if not granted.
