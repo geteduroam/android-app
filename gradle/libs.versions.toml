@@ -3,35 +3,35 @@ android-sdk-compile = "34"
 android-sdk-target = "34"
 android-sdk-min = "26"
 
-android-gradle-plugin = "8.5.2"
+android-gradle-plugin = "8.7.3"
 androidx-junit = "1.1.5"
 espresso-core = "3.5.1"
 google-services-plugin = "4.4.2"
 junit = "4.13.2"
 protobuf = "3.23.0"
-kotlin-gradle-plugin = "1.9.22"
-ksp-plugin = "1.9.22-1.0.17" #NB: ksp version must be compatible with kotlin
+kotlin-gradle-plugin = "2.1.0"
+ksp-plugin = "2.1.0-1.0.29" #NB: ksp version must be compatible with kotlin
 firebase-bom="32.6.0"
 firebase-app-distribution-plugin = "4.0.0"
 firebase-crashlytics-gradle = "2.9.9"
 protobuf-plugin = "0.9.3"
 play-publisher-plugin = "3.8.6"
-compose-navigation = "2.8.0-beta05" # Using beta for type safew navigation arguments
+compose-navigation = "2.8.4"
 
-hilt-android = "2.48.1"
-hilt-navigation-compose = "1.1.0"
+hilt-android = "2.52"
+hilt-navigation-compose = "1.2.0"
 android-material-version = "1.11.0"
 
 core-ktx = "1.12.0"
 activity-compose = "1.8.2"
 lifecycle = "2.8.3"
-coroutines = "1.8.1"
+coroutines = "1.9.0"
 androidx-compose-bom = "2024.01.00"
 material3-version = "1.2.0-rc01"
 accompanist = "0.31.3-beta"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
-kotlin-serialization = "1.6.3"
+kotlin-serialization = "1.7.1"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
@@ -92,5 +92,5 @@ protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }
 play-publisher = { id = "com.github.triplet.play", version.ref = "play-publisher-plugin"}
 firebase-appdistribution = { id = "com.google.firebase.appdistribution", version.ref = "firebase-app-distribution-plugin" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics-gradle" }
-
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-gradle-plugin" }
 [bundles]

@@ -9,12 +9,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.eduroam.geteduroam.R
 import app.eduroam.geteduroam.di.api.GetEduroamApi
+import app.eduroam.geteduroam.di.repository.StorageRepository
 import app.eduroam.geteduroam.extensions.removeNonSpacingMarks
 import app.eduroam.geteduroam.models.Organization
 import app.eduroam.geteduroam.ui.ErrorData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -23,7 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SelectOrganizationViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    val api: GetEduroamApi,
+    private val api: GetEduroamApi,
+    private val storageRepository: StorageRepository
 ) : ViewModel() {
 
     var uiState by mutableStateOf(UiState())
@@ -38,6 +41,10 @@ class SelectOrganizationViewModel @Inject constructor(
         uiState = uiState.copy(isLoading = true)
         viewModelScope.launch (Dispatchers.IO) {
             try {
+                val configuredOrganization = storageRepository.configuredOrganization.firstOrNull()
+                withContext(Dispatchers.Main) {
+                    uiState = uiState.copy(configuredOrganization = configuredOrganization)
+                }
                 val response = api.discover()
                 val discoveryResult = response.body()
                 if (response.isSuccessful && discoveryResult != null) {
@@ -54,7 +61,6 @@ class SelectOrganizationViewModel @Inject constructor(
                             val result = it.improveMatchWords()
                             canImproveSearchWords =  canImproveSearchWords || result
                         }
-                        println("Match words pass")
                         withContext(Dispatchers.Main) {
                             if (uiState.filter.isNotEmpty()) {
                                 onSearchTextChange(uiState.filter)
@@ -140,10 +146,13 @@ class SelectOrganizationViewModel @Inject constructor(
     }
 
     fun clearDialog() {
-
     }
 
     fun clearSelection() {
         uiState = uiState.copy(selectedOrganization = null, filter = "")
+    }
+
+    fun configuredProfileModalShown() {
+        uiState = uiState.copy(didShowConfiguredOrganization = true)
     }
 }

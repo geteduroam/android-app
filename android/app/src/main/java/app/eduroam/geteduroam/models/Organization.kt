@@ -61,6 +61,6 @@ data class Organization(
     companion object {
         private val DELIMITER = "\\W+".toRegex()
 
-        private const val LANGUAGE_KEY_FALLBACK = "any"
+        const val LANGUAGE_KEY_FALLBACK = "any"
     }
 }

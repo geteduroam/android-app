@@ -89,10 +89,8 @@
     <string name="passphrase_accessibility_show_passphrase">Show passphrase</string>
 
     <string name="status_authenticated_by">You are authenticated by:\n%s</string>
-    <string name="status_account_valid_for">Your login is valid for %s</string>
-    <string name="status_account_valid_until">Your login is valid until %s</string>
-    <string name="status_account_expired_ago">Your login expired %s ago</string>
-    <string name="status_account_expired_on">Your login expired on %s</string>
+    <string name="status_account_valid_in_future">You have access until %1$s <b>(in %2$s)</b></string>
+    <string name="status_account_valid_in_past">You had access until %1$s <b>(%2$s ago)</b></string>
     <string name="status_select_different_organization">Select a different organization</string>
     <string name="status_reauthenticate_my_account">Reauthenticate my account</string>
     <string name="status_update_my_password">Update my password</string>
@@ -102,6 +100,14 @@
     <string name="status_username_label">Username: </string>
     <string name="status_ssid_label">SSID: </string>
 
+    <plurals name="time_years">
+        <item quantity="one">year</item>
+        <item quantity="other">years</item>
+    </plurals>
+    <plurals name="time_months">
+        <item quantity="one">month</item>
+        <item quantity="other">months</item>
+    </plurals>
     <plurals name="time_days">
         <item quantity="one">day</item>
         <item quantity="other">days</item>

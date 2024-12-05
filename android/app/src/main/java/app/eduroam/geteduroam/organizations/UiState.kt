@@ -8,6 +8,8 @@ data class UiState(
     val filter: String = "",
     val isLoading: Boolean = false,
     val selectedOrganization: Organization? = null,
+    val configuredOrganization: ConfiguredOrganization? = null,
+    val didShowConfiguredOrganization: Boolean = false,
     val promptAuth: Unit? = null,
     val errorData: ErrorData? = null,
     val showConnectCta: Boolean = false

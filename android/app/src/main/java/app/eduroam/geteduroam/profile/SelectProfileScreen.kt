@@ -13,15 +13,11 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -37,9 +33,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,23 +49,29 @@ import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.config.model.ProviderInfo
 import app.eduroam.geteduroam.models.Configuration
 import app.eduroam.geteduroam.organizations.TermsOfUseDialog
-import app.eduroam.geteduroam.organizations.UsernamePasswordDialog
 import app.eduroam.geteduroam.models.Profile
-import app.eduroam.geteduroam.status.ConfigSource
+import app.eduroam.geteduroam.models.ConfigSource
+import app.eduroam.geteduroam.organizations.ConfiguredOrganization
 import app.eduroam.geteduroam.ui.AlertDialogWithSingleButton
 import app.eduroam.geteduroam.ui.ErrorData
 import app.eduroam.geteduroam.ui.LinkifyText
 import app.eduroam.geteduroam.ui.PrimaryButton
 import app.eduroam.geteduroam.ui.theme.AppTheme
-import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import java.text.DateFormat
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.Period
+import java.time.ZoneOffset
+import java.util.Date
 
 @Composable
 fun SelectProfileScreen(
     viewModel: SelectProfileViewModel,
     goToOAuth: (Configuration) -> Unit,
-    goToConfigScreen: (ConfigSource, String, String?, EAPIdentityProviderList) -> Unit,
+    goToConfigScreen: (ConfiguredOrganization, EAPIdentityProviderList) -> Unit,
     goToPrevious: () -> Unit
 ) = EduTopAppBar(
     title = stringResource(id = R.string.profiles_header),
@@ -107,10 +111,14 @@ fun SelectProfileScreen(
                     ConfigSource.Discovery
                 }
                 goToConfigScreen(
-                    source,
-                    viewModel.institutionId!!,
-                    viewModel.uiState.organization?.name,
-                    providerList)
+                    ConfiguredOrganization(
+                        source = source,
+                        id = viewModel.institutionId!!,
+                        name = viewModel.uiState.organization?.name,
+                        country = viewModel.uiState.organization?.location
+                    ),
+                    providerList
+                )
                 viewModel.didGoToConfigScreen()
             }
     }
@@ -129,12 +137,14 @@ fun SelectProfileScreen(
             .fillMaxSize(),
         profiles = viewModel.uiState.profiles,
         institution = viewModel.uiState.organization,
+        configuredOrganization = viewModel.uiState.configuredOrganization,
         providerInfo = viewModel.uiState.providerInfo,
         inProgress = viewModel.uiState.inProgress,
         errorData = viewModel.uiState.errorData,
         errorDataShown = viewModel::errorDataShown,
         setProfileSelected = viewModel::setProfileSelected,
-        connectWithSelectedProfile = viewModel::connectWithSelectedProfile
+        connectWithSelectedProfile = viewModel::connectWithSelectedProfile,
+        profileExpiryTimestampMs = viewModel.uiState.profileExpiryTimestampMs
     )
 
     if (viewModel.uiState.showTermsOfUseDialog) {
@@ -153,10 +163,12 @@ fun SelectProfileScreen(
 fun SelectProfileContent(
     modifier: Modifier = Modifier,
     profiles: List<PresentProfile>,
-    institution: PresentOrganization? = null,
-    providerInfo: ProviderInfo? = null,
-    inProgress: Boolean = false,
-    errorData: ErrorData? = null,
+    institution: PresentOrganization?,
+    configuredOrganization: ConfiguredOrganization?,
+    profileExpiryTimestampMs: Long?,
+    providerInfo: ProviderInfo?,
+    inProgress: Boolean,
+    errorData: ErrorData?,
     errorDataShown: () -> Unit = {},
     setProfileSelected: (PresentProfile) -> Unit = {},
     connectWithSelectedProfile: () -> Unit = {}
@@ -180,7 +192,8 @@ fun SelectProfileContent(
             .fillMaxSize()
             .padding(horizontal = 16.dp, vertical = 24.dp)
     ) {
-        institution?.name?.let {
+        val institutionName = institution?.name ?: configuredOrganization?.name
+        institutionName?.let {
             Text(
                 text = it,
                 style = MaterialTheme.typography.titleMedium,
@@ -188,7 +201,8 @@ fun SelectProfileContent(
                 fontWeight = FontWeight.Bold
             )
         }
-        institution?.location?.let {
+        val location = institution?.location ?: configuredOrganization?.country
+        location?.let {
             Text(
                 text = it,
                 style = MaterialTheme.typography.titleSmall,
@@ -312,7 +326,37 @@ fun SelectProfileContent(
                 }
             }
         }
-        Spacer(Modifier.height(8.dp))
+        val isExpired: Boolean
+        if (profileExpiryTimestampMs != null) {
+            val configuration = LocalConfiguration.current
+            Spacer(modifier = Modifier.size(16.dp))
+            val nowDate = LocalDateTime.now()
+            val expiryDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(profileExpiryTimestampMs), ZoneOffset.UTC)
+            val expiryDate = Date(profileExpiryTimestampMs)
+            if (nowDate.isBefore(expiryDateTime)) {
+                isExpired = false
+                val duration = formatDuration(date1 = nowDate, date2 = expiryDateTime)
+                val dateFormatter = DateFormat.getDateInstance(DateFormat.LONG, configuration.locales[0])
+                val dateString = dateFormatter.format(expiryDate)
+                Text(
+                    text = stringResource(id = R.string.status_account_valid_in_future, dateString, duration),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            } else {
+                isExpired = true
+                val duration = formatDuration(date1 = expiryDateTime, date2 = nowDate)
+                val dateFormatter = DateFormat.getDateInstance(DateFormat.LONG, configuration.locales[0])
+                val dateString = dateFormatter.format(expiryDate)
+                Text(
+                    text = stringResource(id = R.string.status_account_valid_in_past, dateString, duration),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
+        } else {
+            isExpired = false
+        }
+
+        Spacer(Modifier.height(16.dp))
         PrimaryButton(
             text = stringResource(R.string.button_connect),
             enabled = !inProgress,
@@ -323,6 +367,33 @@ fun SelectProfileContent(
     }
 }
 
+@Composable
+fun formatDuration(date1: LocalDateTime, date2: LocalDateTime): String {
+    val period = Period.between(date1.toLocalDate(), date2.toLocalDate())
+    val duration = Duration.between(date1, date2)
+
+    val days = period.days
+    val months = period.months
+    val years = period.years
+
+    val hours = duration.toHours().toInt()
+    val minutes = (duration.toMinutes() % 60).toInt()
+    val seconds = (duration.seconds % 60).toInt()
+    return if (years > 0) {
+        "$years ${pluralStringResource(id = R.plurals.time_years, years)}"
+    } else if (months > 0) {
+        "$months ${pluralStringResource(id = R.plurals.time_months, months)}"
+    } else if (days > 0) {
+        "$days ${pluralStringResource(id = R.plurals.time_days, days)}"
+    } else if (hours > 0) {
+        "$hours ${pluralStringResource(id = R.plurals.time_hours, hours)}"
+    } else if (minutes > 0) {
+        "$minutes ${pluralStringResource(id = R.plurals.time_minutes, minutes)}"
+    } else {
+        "$seconds ${pluralStringResource(id = R.plurals.time_seconds, seconds)}"
+    }
+}
+
 
 @Preview(uiMode = android.content.res.Configuration.UI_MODE_NIGHT_NO)
 @Composable
@@ -330,7 +401,12 @@ private fun Preview_SelectProfileModal() {
     AppTheme {
         SelectProfileContent(
             profiles = profileList,
-            institution = PresentOrganization("Uninett", "NO")
+            institution = PresentOrganization("Uninett", "NO"),
+            configuredOrganization = null,
+            providerInfo = null,
+            inProgress = false,
+            errorData = null,
+            profileExpiryTimestampMs = LocalDateTime.now().plusDays(3).toEpochSecond(ZoneOffset.UTC) * 1000
         )
     }
 }

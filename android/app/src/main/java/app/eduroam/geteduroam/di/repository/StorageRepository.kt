@@ -9,7 +9,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.models.Configuration
-import app.eduroam.geteduroam.status.ConfigSource
+import app.eduroam.geteduroam.models.ConfigSource
+import app.eduroam.geteduroam.organizations.ConfiguredOrganization
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
@@ -20,8 +21,6 @@ import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationRequest
 import timber.log.Timber
 import java.io.IOException
-import java.util.Date
-import kotlin.math.exp
 
 class StorageRepository(private val context: Context) {
 
@@ -82,7 +81,7 @@ class StorageRepository(private val context: Context) {
         preferences[PreferencesKeys.LAST_KNOWN_CONFIG_HASH]
     }
 
-    val configuredOrganizationName: Flow<String?> = context.dataStore.data.catch { exception ->
+    val configuredOrganization: Flow<ConfiguredOrganization?> = context.dataStore.data.catch { exception ->
         if (exception is IOException) {
             Timber.w(exception, "Error reading preferences.")
             emit(emptyPreferences())
@@ -90,37 +89,27 @@ class StorageRepository(private val context: Context) {
             throw exception
         }
     }.map { preferences ->
-        preferences[PreferencesKeys.CONFIGURED_ORGANIZATION_NAME]
-    }
-
-    val configuredOrganizationId: Flow<String?> = context.dataStore.data.catch { exception ->
-        if (exception is IOException) {
-            Timber.w(exception, "Error reading preferences.")
-            emit(emptyPreferences())
+        val id = preferences[PreferencesKeys.CONFIGURED_ORGANIZATION_ID]
+        val name = preferences[PreferencesKeys.CONFIGURED_ORGANIZATION_NAME]
+        val source = preferences[PreferencesKeys.CONFIGURED_ORGANIZATION_SOURCE]
+        val country = preferences[PreferencesKeys.CONFIGURED_ORGANIZATION_COUNTRY]
+        if (id != null && source != null) {
+            try {
+                ConfiguredOrganization(
+                    source = ConfigSource.valueOf(source),
+                    id = id,
+                    name = name,
+                    country = country
+                )
+            } catch (ex: Exception) {
+                // Source might not exist?
+                null
+            }
         } else {
-            throw exception
-        }
-    }.map { preferences ->
-        preferences[PreferencesKeys.CONFIGURED_ORGANIZATION_ID]
-    }
-
-    val configuredProfileSource: Flow<ConfigSource> = context.dataStore.data.catch { exception ->
-        if (exception is IOException) {
-            Timber.w(exception, "Error reading preferences.")
-            emit(emptyPreferences())
-        } else {
-            throw exception
-        }
-    }.map { preferences ->
-        try {
-            return@map preferences[PreferencesKeys.CONFIGURED_PROFILE_SOURCE]?.let {
-                ConfigSource.valueOf(it)
-            } ?: ConfigSource.Unknown
-        } catch (ex: Exception){
-            return@map ConfigSource.Unknown
+            null
         }
     }
-
+    
     val profileExpiryTimestampMs: Flow<Long?> = context.dataStore.data.catch { exception ->
         if (exception is IOException) {
             Timber.w(exception, "Error reading preferences.")
@@ -182,18 +171,22 @@ class StorageRepository(private val context: Context) {
     }
 
     suspend fun saveConfigForStatusScreen(
-        organizationId: String,
-        organizationName: String?,
+        configuredOrganization: ConfiguredOrganization,
         expiryTimestampMs: Long?,
-        config: EAPIdentityProviderList,
-        source: ConfigSource
+        config: EAPIdentityProviderList
     ) {
         context.dataStore.edit { settings ->
-            settings[PreferencesKeys.CONFIGURED_ORGANIZATION_ID] = organizationId
-            if (organizationName == null) {
-                settings.remove(PreferencesKeys.CONFIGURED_ORGANIZATION_NAME)
+            settings[PreferencesKeys.CONFIGURED_ORGANIZATION_ID] = configuredOrganization.id
+            settings[PreferencesKeys.CONFIGURED_ORGANIZATION_SOURCE] = configuredOrganization.source.name
+            if (configuredOrganization.name != null) {
+                settings[PreferencesKeys.CONFIGURED_ORGANIZATION_NAME] = configuredOrganization.name
             } else {
-                settings[PreferencesKeys.CONFIGURED_ORGANIZATION_NAME] = organizationName
+                settings.remove(PreferencesKeys.CONFIGURED_ORGANIZATION_NAME)
+            }
+            if (configuredOrganization.country != null) {
+                settings[PreferencesKeys.CONFIGURED_ORGANIZATION_COUNTRY] = configuredOrganization.country
+            } else {
+                settings.remove(PreferencesKeys.CONFIGURED_ORGANIZATION_COUNTRY)
             }
             if (expiryTimestampMs == null) {
                 settings.remove(PreferencesKeys.CONFIGURED_PROFILE_EXPIRY_TIMESTAMP_MS)
@@ -202,7 +195,6 @@ class StorageRepository(private val context: Context) {
             }
             val serializedConfig = Json.encodeToString(config)
             settings[PreferencesKeys.CONFIGURED_PROFILE_LAST_CONFIG] = serializedConfig
-            settings[PreferencesKeys.CONFIGURED_PROFILE_SOURCE] = source.name
         }
     }
 
@@ -214,8 +206,9 @@ class StorageRepository(private val context: Context) {
         val LAST_KNOWN_CONFIG_HASH = intPreferencesKey("last_known_configuration_hash")
         val CONFIGURED_ORGANIZATION_ID = stringPreferencesKey("configuredOrganizationId")
         val CONFIGURED_ORGANIZATION_NAME = stringPreferencesKey("configuredOrganizationName")
+        val CONFIGURED_ORGANIZATION_COUNTRY = stringPreferencesKey("configuredOrganizationCountry")
+        val CONFIGURED_ORGANIZATION_SOURCE = stringPreferencesKey("configuredOrganizationSource")
         val CONFIGURED_PROFILE_LAST_CONFIG = stringPreferencesKey("configuredProfileLastConfig")
         val CONFIGURED_PROFILE_EXPIRY_TIMESTAMP_MS = longPreferencesKey("configuredProfileExpiryTimestampMs")
-        val CONFIGURED_PROFILE_SOURCE = stringPreferencesKey("configuredProfileSource")
     }
 }

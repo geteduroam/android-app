@@ -37,7 +37,7 @@ class SelectProfileViewModel @Inject constructor(
     @ApplicationContext context: Context,
     savedStateHandle: SavedStateHandle,
     val api: GetEduroamApi,
-    private val repository: StorageRepository,
+    private val storageRepository: StorageRepository,
 ) : ViewModel() {
 
     private val parser = AndroidConfigParser()
@@ -65,6 +65,16 @@ class SelectProfileViewModel @Inject constructor(
                 )
             )
         }
+        viewModelScope.launch {
+            val configuredOrganization = storageRepository.configuredOrganization.first()
+            if (institutionId == configuredOrganization?.id) {
+                val profileExpiryTimestampMs = storageRepository.profileExpiryTimestampMs.first()
+                uiState = uiState.copy(
+                    configuredOrganization = configuredOrganization,
+                    profileExpiryTimestampMs = profileExpiryTimestampMs
+                )
+            }
+        }
     }
 
     private fun loadDataFromInstitution() = viewModelScope.launch {
@@ -78,6 +88,9 @@ class SelectProfileViewModel @Inject constructor(
             response.body()
         } catch (ex: Exception) {
             Timber.w(ex, "Could not fetch organizations!")
+            if (responseError == null) {
+                responseError = ex.message
+            }
             null
         }
         if (institutionResult != null) {
@@ -107,14 +120,15 @@ class SelectProfileViewModel @Inject constructor(
                     isFirstProfile = false
                     result
                 }
+                val autoConnectWithSingleProfile = isSingleProfile && uiState.configuredOrganization != null
                 uiState = uiState.copy(
-                    inProgress = isSingleProfile,
+                    inProgress = autoConnectWithSingleProfile,
                     profiles = presentProfiles,
                     organization = PresentOrganization(
                         name = selectedInstitution.getLocalizedName(), location = selectedInstitution.country
                     )
                 )
-                if (isSingleProfile) {
+                if (autoConnectWithSingleProfile) {
                     Timber.i("Single profile for institution. Continue with configuration")
                     connectWithProfile(presentProfiles[0].profile, startOAuthFlowIfNoAccess = true)
                 }
@@ -174,7 +188,6 @@ class SelectProfileViewModel @Inject constructor(
 
     }
 
-
     private suspend fun resolveLetswifiProfile(letswifiProfile: Profile): Profile {
         val endpoint = letswifiProfile.letswifiEndpoint
         if (endpoint.isNullOrEmpty()) {
@@ -215,9 +228,9 @@ class SelectProfileViewModel @Inject constructor(
             if (profile.oauth) {
                 Timber.i("Selected profile requires authentication.")
 
-                if (repository.isAuthenticatedForConfig(profile.createConfiguration())) {
+                if (storageRepository.isAuthenticatedForConfig(profile.createConfiguration())) {
                     Timber.i("Already authenticated for this profile, continue with existing credentials")
-                    val authState = repository.authState.first()
+                    val authState = storageRepository.authState.first()
                     viewModelScope.launch(Dispatchers.IO) {
                         getEapFrom(profile.eapconfigEndpoint, authState?.accessToken?.let { "Bearer $it" })
                     }
