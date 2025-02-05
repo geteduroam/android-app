@@ -149,6 +149,7 @@ sealed class Route {
     @Serializable
     data class ConfigureWifi(
         val configuredOrganization: ConfiguredOrganization,
+        val configuredProfileId: String?,
         val eapIdentityProviderList: EAPIdentityProviderList
     ): Route() {
         companion object {
@@ -165,7 +166,7 @@ sealed class Route {
                         id = provider.eapIdentityProvider?.firstOrNull()?.ID ?: ConfiguredOrganization.ID_ORGANIZATION_FROM_FILE,
                         name = null,
                         country = null
-                    ), provider)
+                    ), null, provider)
                 } catch (ex: Exception) {
                     Timber.w(ex, "Could not parse file opened!")
                     null

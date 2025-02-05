@@ -23,7 +23,7 @@ data class UiState(
     val profileExpiryTimestampMs: Long? = null
 )
 
-data class PresentProfile(val profile: Profile, val isSelected: Boolean = false)
+data class PresentProfile(val profile: Profile, val isConfigured: Boolean = false, val isSelected: Boolean = false)
 
 data class PresentOrganization(
     val name: String? = null,

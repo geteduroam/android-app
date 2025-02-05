@@ -41,6 +41,7 @@ class WifiConfigViewModel @Inject constructor(
 
     val eapIdentityProviderList: EAPIdentityProviderList
     val configuredOrganization: ConfiguredOrganization
+    val configuredProfileId: String? // Can be null if configured from file
 
     val launch: MutableStateFlow<Unit?> = MutableStateFlow(null)
     val progressMessage = MutableStateFlow("")
@@ -57,6 +58,7 @@ class WifiConfigViewModel @Inject constructor(
         launch.value = Unit
         val data = savedStateHandle.toRoute<Route.ConfigureWifi>(NavTypes.allTypesMap)
         eapIdentityProviderList = data.eapIdentityProviderList
+        configuredProfileId = data.configuredProfileId
         configuredOrganization = data.configuredOrganization
     }
 
@@ -341,6 +343,7 @@ class WifiConfigViewModel @Inject constructor(
         viewModelScope.launch {
             storageRepository.saveConfigForStatusScreen(
                 configuredOrganization = configuredOrganization,
+                configuredProfileId = configuredProfileId,
                 expiryTimestampMs = eapIdentityProviderList.eapIdentityProvider?.firstOrNull()?.validUntil?.time,
                 config = eapIdentityProviderList
             )

@@ -47,11 +47,11 @@ fun MainGraph(
                         )
                     )
                 },
-                goToConfigScreen = { configuredOrganization, wifiConfigData ->
+                goToConfigScreen = { configuredOrganization, configuredProfileId, wifiConfigData ->
                     navController.popBackStack()
                     navController.navigate(
                         Route.ConfigureWifi(
-                            configuredOrganization, wifiConfigData
+                            configuredOrganization, configuredProfileId, wifiConfigData
                         )
                     )
                 },
@@ -68,10 +68,11 @@ fun MainGraph(
                 goToOAuth = { configuration ->
                     navController.navigate(Route.OAuth(configuration, null))
                 },
-                goToConfigScreen = { configuredOrganization, provider ->
+                goToConfigScreen = { configuredOrganization, profileId, provider ->
                     navController.navigate(
                         Route.ConfigureWifi(
                             configuredOrganization,
+                            profileId,
                             provider
                         )
                     )

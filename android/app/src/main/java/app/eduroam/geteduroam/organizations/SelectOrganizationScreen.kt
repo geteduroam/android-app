@@ -69,7 +69,7 @@ fun SelectOrganizationScreen(
     viewModel: SelectOrganizationViewModel,
     openProfileModal: (String) -> Unit,
     goToOAuth: (Configuration) -> Unit,
-    goToConfigScreen: (ConfiguredOrganization, EAPIdentityProviderList) -> Unit,
+    goToConfigScreen: (ConfiguredOrganization, String?, EAPIdentityProviderList) -> Unit,
     openFileUri: (Uri) -> Unit,
     discoverUrl: (Uri) -> Unit
 ) {
@@ -88,6 +88,7 @@ fun SelectOrganizationScreen(
                 viewModel.onStepCompleted()
                 goToConfigScreen(
                     currentStep.configuredOrganization,
+                    currentStep.configuredProfileId,
                     currentStep.eapIdentityProviderList)
             }
 

@@ -25,6 +25,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -47,7 +48,9 @@ class SelectProfileViewModel @Inject constructor(
     val institutionId: String?
 
     val customHost: Uri?
+
     private var didAgreeToTerms = false
+    private var previouslyConfiguredProfileId: String? = null
 
     init {
         val data = savedStateHandle.toRoute<Route.SelectProfile>(NavTypes.allTypesMap)
@@ -67,6 +70,7 @@ class SelectProfileViewModel @Inject constructor(
         }
         viewModelScope.launch {
             val configuredOrganization = storageRepository.configuredOrganization.first()
+            previouslyConfiguredProfileId = storageRepository.configuredProfileLastConfig.firstOrNull()?.first
             if (institutionId == configuredOrganization?.id) {
                 val profileExpiryTimestampMs = storageRepository.profileExpiryTimestampMs.first()
                 uiState = uiState.copy(
@@ -97,12 +101,20 @@ class SelectProfileViewModel @Inject constructor(
             val selectedInstitution = institutionResult.content.institutions.find { it.id == institutionId }
             if (selectedInstitution != null) {
                 val isSingleProfile = selectedInstitution.profiles.size == 1
-                var isFirstProfile = true
+                val profileIdToSelect  = if (previouslyConfiguredProfileId != null) {
+                    previouslyConfiguredProfileId
+                } else {
+                    selectedInstitution.profiles.firstOrNull()?.id
+                }
                 val presentProfiles = selectedInstitution.profiles.map { profile ->
                     val result: PresentProfile
                     if (profile.type == Profile.Type.letswifi) {
                         try {
-                            result = PresentProfile(profile = resolveLetswifiProfile(profile), isSelected = isFirstProfile)
+                            result = PresentProfile(
+                                profile = resolveLetswifiProfile(profile),
+                                isConfigured = previouslyConfiguredProfileId == profile.id,
+                                isSelected = profileIdToSelect == profile.id
+                            )
                         } catch (ex: Exception) {
                             Timber.w(ex, "Could not fetch letswifi profile!")
                             uiState = uiState.copy(
@@ -115,9 +127,8 @@ class SelectProfileViewModel @Inject constructor(
                             return@launch
                         }
                     } else {
-                        result = PresentProfile(profile = profile, isSelected = isFirstProfile)
+                        result = PresentProfile(profile = profile, isSelected = profileIdToSelect == profile.id)
                     }
-                    isFirstProfile = false
                     result
                 }
                 val autoConnectWithSingleProfile = isSingleProfile && uiState.configuredOrganization != null

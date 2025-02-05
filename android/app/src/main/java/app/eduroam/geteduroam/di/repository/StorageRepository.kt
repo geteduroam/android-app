@@ -121,7 +121,7 @@ class StorageRepository(private val context: Context) {
         preferences[PreferencesKeys.CONFIGURED_PROFILE_EXPIRY_TIMESTAMP_MS]
     }
 
-    val configuredProfileLastConfig: Flow<EAPIdentityProviderList?> = context.dataStore.data.catch { exception ->
+    val configuredProfileLastConfig: Flow<Pair<String?, EAPIdentityProviderList>?> = context.dataStore.data.catch { exception ->
         if (exception is IOException) {
             Timber.w(exception, "Error reading preferences.")
             emit(emptyPreferences())
@@ -129,9 +129,10 @@ class StorageRepository(private val context: Context) {
             throw exception
         }
     }.map { preferences ->
+        val profileId = preferences[PreferencesKeys.CONFIGURED_PROFILE_ID]
         val savedConfig = preferences[PreferencesKeys.CONFIGURED_PROFILE_LAST_CONFIG] ?: return@map null
         try {
-            return@map Json.decodeFromString(savedConfig)
+            return@map Pair(profileId, Json.decodeFromString(savedConfig))
         } catch (ex: Exception) {
             return@map null
         }
@@ -172,11 +173,17 @@ class StorageRepository(private val context: Context) {
 
     suspend fun saveConfigForStatusScreen(
         configuredOrganization: ConfiguredOrganization,
+        configuredProfileId: String?,
         expiryTimestampMs: Long?,
         config: EAPIdentityProviderList
     ) {
         context.dataStore.edit { settings ->
             settings[PreferencesKeys.CONFIGURED_ORGANIZATION_ID] = configuredOrganization.id
+            if (configuredProfileId == null) {
+                settings.remove(PreferencesKeys.CONFIGURED_PROFILE_ID)
+            } else {
+                settings[PreferencesKeys.CONFIGURED_PROFILE_ID] = configuredProfileId
+            }
             settings[PreferencesKeys.CONFIGURED_ORGANIZATION_SOURCE] = configuredOrganization.source.name
             if (configuredOrganization.name != null) {
                 settings[PreferencesKeys.CONFIGURED_ORGANIZATION_NAME] = configuredOrganization.name
@@ -205,6 +212,7 @@ class StorageRepository(private val context: Context) {
 
         val LAST_KNOWN_CONFIG_HASH = intPreferencesKey("last_known_configuration_hash")
         val CONFIGURED_ORGANIZATION_ID = stringPreferencesKey("configuredOrganizationId")
+        val CONFIGURED_PROFILE_ID = stringPreferencesKey("configuredProfileId")
         val CONFIGURED_ORGANIZATION_NAME = stringPreferencesKey("configuredOrganizationName")
         val CONFIGURED_ORGANIZATION_COUNTRY = stringPreferencesKey("configuredOrganizationCountry")
         val CONFIGURED_ORGANIZATION_SOURCE = stringPreferencesKey("configuredOrganizationSource")

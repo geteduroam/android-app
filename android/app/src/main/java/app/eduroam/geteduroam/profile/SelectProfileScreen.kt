@@ -71,7 +71,7 @@ import java.util.Date
 fun SelectProfileScreen(
     viewModel: SelectProfileViewModel,
     goToOAuth: (Configuration) -> Unit,
-    goToConfigScreen: (ConfiguredOrganization, EAPIdentityProviderList) -> Unit,
+    goToConfigScreen: (ConfiguredOrganization, String?, EAPIdentityProviderList) -> Unit,
     goToPrevious: () -> Unit
 ) = EduTopAppBar(
     title = stringResource(id = R.string.profiles_header),
@@ -110,6 +110,7 @@ fun SelectProfileScreen(
                 } else {
                     ConfigSource.Discovery
                 }
+                val selectedProfileId = viewModel.uiState.profiles.firstOrNull { it.isSelected }?.profile?.id
                 goToConfigScreen(
                     ConfiguredOrganization(
                         source = source,
@@ -117,6 +118,7 @@ fun SelectProfileScreen(
                         name = viewModel.uiState.organization?.name,
                         country = viewModel.uiState.organization?.location
                     ),
+                    selectedProfileId,
                     providerList
                 )
                 viewModel.didGoToConfigScreen()

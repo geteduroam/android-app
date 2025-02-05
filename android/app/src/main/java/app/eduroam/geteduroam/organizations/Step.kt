@@ -9,6 +9,7 @@ sealed class Step {
     object Start : Step()
     data class DoConfig(
         val configuredOrganization: ConfiguredOrganization,
+        val configuredProfileId: String?,
         val eapIdentityProviderList: EAPIdentityProviderList
     ) : Step()
     data class DoOAuthFor(val configuration: Configuration) : Step()
