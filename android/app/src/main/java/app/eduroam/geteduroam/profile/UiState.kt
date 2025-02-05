@@ -20,7 +20,8 @@ data class UiState(
     val showTermsOfUseDialog: Boolean = false,
     val goToConfigScreenWithProviderList: EAPIdentityProviderList? = null,
     val openUrlInBrowser: String? = null,
-    val profileExpiryTimestampMs: Long? = null
+    val profileExpiryTimestampMs: Long? = null,
+    val showAlertForConfiguringDifferentProfile: PresentProfile? = null
 )
 
 data class PresentProfile(val profile: Profile, val isConfigured: Boolean = false, val isSelected: Boolean = false)

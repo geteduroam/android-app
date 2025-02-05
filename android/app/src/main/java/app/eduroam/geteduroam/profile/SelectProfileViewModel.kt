@@ -127,7 +127,11 @@ class SelectProfileViewModel @Inject constructor(
                             return@launch
                         }
                     } else {
-                        result = PresentProfile(profile = profile, isSelected = profileIdToSelect == profile.id)
+                        result = PresentProfile(
+                            profile = profile,
+                            isConfigured = previouslyConfiguredProfileId == profile.id,
+                            isSelected = profileIdToSelect == profile.id
+                        )
                     }
                     result
                 }
@@ -217,6 +221,12 @@ class SelectProfileViewModel @Inject constructor(
     }
 
     fun setProfileSelected(profile: PresentProfile) {
+        val hasConfiguredProfile = uiState.profiles.any { it.isConfigured }
+        if (!profile.isSelected && hasConfiguredProfile && !profile.isConfigured) {
+            // We have a configured profile, and the user selected a different one
+            uiState = uiState.copy(showAlertForConfiguringDifferentProfile = profile)
+            return
+        }
         uiState = uiState.copy(
             profiles = uiState.profiles.map {
                 it.copy(isSelected = it.profile == profile.profile)
@@ -355,7 +365,7 @@ class SelectProfileViewModel @Inject constructor(
     }
 
     fun errorDataShown() {
-        uiState = uiState.copy(errorData = null)
+        uiState = uiState.copy(errorData = null, showAlertForConfiguringDifferentProfile = null)
     }
 
     /**
@@ -386,5 +396,12 @@ class SelectProfileViewModel @Inject constructor(
 
     fun didGoToConfigScreen() {
         uiState = uiState.copy(goToConfigScreenWithProviderList = null)
+    }
+
+    fun resetConfigurationAndSelectProfile(presentProfile: PresentProfile) {
+        previouslyConfiguredProfileId = null
+        uiState = uiState.copy(
+            profiles = uiState.profiles.map { it.copy(isConfigured = false, isSelected = presentProfile == it) }
+        )
     }
 }

@@ -7,6 +7,10 @@
     <string name="institutions_choose_one">Kies de instelling waarmee je verbinding wil maken.</string>
     <string name="profiles_title">Profielen</string>
     <string name="profiles_header">Kies een profiel</string>
+    <string name="profiles_already_configured_for_profile">Reeds ingesteld voor %s-profiel</string>
+    <string name="profiles_do_you_want_to_reconfigure_device">Wil je jouw toestel instellen om het %@-profiel te gebruiken?</string>
+    <string name="profiles_reconfigure_profile">Stel toestel opnieuw in</string>
+    <string name="profiles_reconfigure_cancel">Annuleer</string>
     <string name="configuration_progress">Bezig met WiFi configuratie</string>
     <string name="configuration_waiting_for_user_credentials">Wachten op gebruikersgegevens...</string>
     <string name="configuration_android_10_notification_disclaimer">Android 10 vereist dat je de nieuwe Wi-Fi-netwerken accepteert via een stille melding. Bekijk uw meldingen om verbinding te maken met de nieuwe netwerken.</string>

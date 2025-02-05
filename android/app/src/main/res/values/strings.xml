@@ -9,6 +9,10 @@
     <string name="institutions_choose_one">Select the institution you want to connect to.</string>
     <string name="profiles_title">Profiles</string>
     <string name="profiles_header">Select a profile</string>
+    <string name="profiles_already_configured_for_profile">Already configured for %s profile</string>
+    <string name="profiles_do_you_want_to_reconfigure_device">Do you want to reconfigure your device to use %s profile instead?</string>
+    <string name="profiles_reconfigure_profile">Reconfigure device</string>
+    <string name="profiles_reconfigure_cancel">Cancel</string>
     <string name="configuration_progress">Establishing WiFi connection</string>
     <string name="configuration_waiting_for_user_credentials">Waiting for user credentials…</string>
     <string name="configuration_android_10_notification_disclaimer">Android 10 requires you to accept the new Wi-Fi networks via a Silent notification. See your notifications section to connect to the new networks.</string>

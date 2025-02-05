@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -24,6 +25,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -143,7 +145,9 @@ fun SelectProfileScreen(
         providerInfo = viewModel.uiState.providerInfo,
         inProgress = viewModel.uiState.inProgress,
         errorData = viewModel.uiState.errorData,
+        showAlertForConfiguringDifferentProfile = viewModel.uiState.showAlertForConfiguringDifferentProfile,
         errorDataShown = viewModel::errorDataShown,
+        resetConfigurationAndSelectProfile = viewModel::resetConfigurationAndSelectProfile,
         setProfileSelected = viewModel::setProfileSelected,
         connectWithSelectedProfile = viewModel::connectWithSelectedProfile,
         profileExpiryTimestampMs = viewModel.uiState.profileExpiryTimestampMs
@@ -171,7 +175,9 @@ fun SelectProfileContent(
     providerInfo: ProviderInfo?,
     inProgress: Boolean,
     errorData: ErrorData?,
+    showAlertForConfiguringDifferentProfile: PresentProfile?,
     errorDataShown: () -> Unit = {},
+    resetConfigurationAndSelectProfile: (PresentProfile) -> Unit = {},
     setProfileSelected: (PresentProfile) -> Unit = {},
     connectWithSelectedProfile: () -> Unit = {}
 ) = Surface(
@@ -367,6 +373,52 @@ fun SelectProfileContent(
                 .navigationBarsPadding()
         )
     }
+    if (showAlertForConfiguringDifferentProfile != null) {
+        val profileName = showAlertForConfiguringDifferentProfile.profile.getLocalizedName()
+        AlertDialog(
+            onDismissRequest = {
+                errorDataShown()
+            },
+            title = {
+                Text(
+                    text = stringResource(R.string.profiles_reconfigure_profile, profileName),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.profiles_do_you_want_to_reconfigure_device, profileName),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        resetConfigurationAndSelectProfile(showAlertForConfiguringDifferentProfile)
+                        connectWithSelectedProfile()
+                        errorDataShown()
+                    }
+                ) {
+                    Text(
+                        text = stringResource(R.string.profiles_reconfigure_profile),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        errorDataShown()
+                    }
+                ) {
+                    Text(
+                        text = stringResource(R.string.profiles_reconfigure_cancel),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                    )
+                }
+            })
+    }
+
 }
 
 @Composable
@@ -405,10 +457,11 @@ private fun Preview_SelectProfileModal() {
             profiles = profileList,
             institution = PresentOrganization("Uninett", "NO"),
             configuredOrganization = null,
+            profileExpiryTimestampMs = LocalDateTime.now().plusDays(3).toEpochSecond(ZoneOffset.UTC) * 1000,
             providerInfo = null,
             inProgress = false,
             errorData = null,
-            profileExpiryTimestampMs = LocalDateTime.now().plusDays(3).toEpochSecond(ZoneOffset.UTC) * 1000
+            showAlertForConfiguringDifferentProfile = null
         )
     }
 }
