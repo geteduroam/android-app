@@ -1,6 +1,7 @@
 package app.eduroam.geteduroam.profile
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -21,6 +23,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -39,12 +42,16 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import app.eduroam.geteduroam.EduTopAppBar
 import app.eduroam.geteduroam.R
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
@@ -150,7 +157,8 @@ fun SelectProfileScreen(
         resetConfigurationAndSelectProfile = viewModel::resetConfigurationAndSelectProfile,
         setProfileSelected = viewModel::setProfileSelected,
         connectWithSelectedProfile = viewModel::connectWithSelectedProfile,
-        profileExpiryTimestampMs = viewModel.uiState.profileExpiryTimestampMs
+        profileExpiryTimestampMs = viewModel.uiState.profileExpiryTimestampMs,
+        requestReconfiguration = viewModel::requestReconfiguration
     )
 
     if (viewModel.uiState.showTermsOfUseDialog) {
@@ -179,7 +187,8 @@ fun SelectProfileContent(
     errorDataShown: () -> Unit = {},
     resetConfigurationAndSelectProfile: (PresentProfile) -> Unit = {},
     setProfileSelected: (PresentProfile) -> Unit = {},
-    connectWithSelectedProfile: () -> Unit = {}
+    connectWithSelectedProfile: () -> Unit = {},
+    requestReconfiguration: () -> Unit = {}
 ) = Surface(
     modifier = modifier
 ) {
@@ -347,7 +356,7 @@ fun SelectProfileContent(
                 val dateFormatter = DateFormat.getDateInstance(DateFormat.LONG, configuration.locales[0])
                 val dateString = dateFormatter.format(expiryDate)
                 Text(
-                    text = stringResource(id = R.string.status_account_valid_in_future, dateString, duration),
+                    text = AnnotatedString.fromHtml(stringResource(id = R.string.profile_status_account_valid_in_future, dateString, duration)),
                     style = MaterialTheme.typography.labelLarge,
                 )
             } else {
@@ -356,7 +365,7 @@ fun SelectProfileContent(
                 val dateFormatter = DateFormat.getDateInstance(DateFormat.LONG, configuration.locales[0])
                 val dateString = dateFormatter.format(expiryDate)
                 Text(
-                    text = stringResource(id = R.string.status_account_valid_in_past, dateString, duration),
+                    text = AnnotatedString.fromHtml(stringResource(id = R.string.profile_status_account_valid_in_past, dateString, duration)),
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
@@ -365,13 +374,46 @@ fun SelectProfileContent(
         }
 
         Spacer(Modifier.height(16.dp))
-        PrimaryButton(
-            text = stringResource(R.string.button_connect),
-            enabled = !inProgress,
-            onClick = { connectWithSelectedProfile() },
-            modifier = Modifier
-                .navigationBarsPadding()
-        )
+        val configuredProfile = profiles.firstOrNull { it.isConfigured }
+        if (configuredProfile != null) {
+            Row(
+                modifier = Modifier.navigationBarsPadding(),
+                verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painterResource(R.drawable.ic_saved_organization),
+                    contentDescription = "Saved profile indicator",
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = stringResource(id = R.string.profiles_profile_configured),
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                )
+                Spacer(Modifier.width(12.dp))
+                IconButton(
+                    modifier = Modifier.padding(4.dp)
+                        .background(Color.White.copy(alpha = 0.3f), shape = MaterialTheme.shapes.small),
+                    onClick ={
+                    requestReconfiguration()
+                }) {
+                    Icon(
+                        painterResource(R.drawable.ic_profile_renew),
+                        contentDescription = "Reconfigure profile",
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+        } else {
+            PrimaryButton(
+                text = stringResource(R.string.button_connect),
+                enabled = !inProgress,
+                onClick = { connectWithSelectedProfile() },
+                modifier = Modifier
+                    .navigationBarsPadding()
+            )
+        }
     }
     if (showAlertForConfiguringDifferentProfile != null) {
         val profileName = showAlertForConfiguringDifferentProfile.profile.getLocalizedName()

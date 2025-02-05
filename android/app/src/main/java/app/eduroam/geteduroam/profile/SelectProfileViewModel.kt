@@ -70,8 +70,8 @@ class SelectProfileViewModel @Inject constructor(
         }
         viewModelScope.launch {
             val configuredOrganization = storageRepository.configuredOrganization.first()
-            previouslyConfiguredProfileId = storageRepository.configuredProfileLastConfig.firstOrNull()?.first
             if (institutionId == configuredOrganization?.id) {
+                previouslyConfiguredProfileId = storageRepository.configuredProfileLastConfig.firstOrNull()?.first
                 val profileExpiryTimestampMs = storageRepository.profileExpiryTimestampMs.first()
                 uiState = uiState.copy(
                     configuredOrganization = configuredOrganization,
@@ -135,7 +135,7 @@ class SelectProfileViewModel @Inject constructor(
                     }
                     result
                 }
-                val autoConnectWithSingleProfile = isSingleProfile && uiState.configuredOrganization != null
+                val autoConnectWithSingleProfile = isSingleProfile && !presentProfiles[0].isConfigured
                 uiState = uiState.copy(
                     inProgress = autoConnectWithSingleProfile,
                     profiles = presentProfiles,
@@ -403,5 +403,9 @@ class SelectProfileViewModel @Inject constructor(
         uiState = uiState.copy(
             profiles = uiState.profiles.map { it.copy(isConfigured = false, isSelected = presentProfile == it) }
         )
+    }
+
+    fun requestReconfiguration() {
+        uiState = uiState.copy(showAlertForConfiguringDifferentProfile = uiState.profiles.firstOrNull { it.isConfigured })
     }
 }

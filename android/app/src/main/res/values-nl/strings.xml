@@ -9,6 +9,8 @@
     <string name="profiles_header">Kies een profiel</string>
     <string name="profiles_already_configured_for_profile">Reeds ingesteld voor %s-profiel</string>
     <string name="profiles_do_you_want_to_reconfigure_device">Wil je jouw toestel instellen om het %@-profiel te gebruiken?</string>
+    <string name="profiles_connected_with_profile">Reeds verbonden</string>
+    <string name="profiles_reconfigure_device_to_renew">Stel jouw toestel opnieuw in om netwerktoegang te vernieuwen of als je problemen ervaart met het netwerk.</string>
     <string name="profiles_reconfigure_profile">Stel toestel opnieuw in</string>
     <string name="profiles_reconfigure_cancel">Annuleer</string>
     <string name="configuration_progress">Bezig met WiFi configuratie</string>
@@ -89,4 +91,8 @@
     <string name="passphrase_dialog_incorrect_passphrase">Het ingevulde wachtwoord is onjuist!</string>
     <string name="passphrase_accessibility_hide_passphrase">Verberg wachtwoord</string>
     <string name="passphrase_accessibility_show_passphrase">Toon wachtwoord</string>
+
+    <string name="profile_status_account_valid_in_future"><![CDATA[Je hebt toegang tot %1$s <b>(over %2$s)</b>]]></string>
+    <string name="profile_status_account_valid_in_past"><![CDATA[Je had toegang tot %1$s <b>(%2$s geleden)</b>]]></string>
+
 </resources>

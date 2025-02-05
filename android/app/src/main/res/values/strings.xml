@@ -11,8 +11,11 @@
     <string name="profiles_header">Select a profile</string>
     <string name="profiles_already_configured_for_profile">Already configured for %s profile</string>
     <string name="profiles_do_you_want_to_reconfigure_device">Do you want to reconfigure your device to use %s profile instead?</string>
+    <string name="profiles_connected_with_profile">Already connected</string>
+    <string name="profiles_reconfigure_device_to_renew">Reconfigure your device to renew your network access or if you are experiencing network issues.</string>
     <string name="profiles_reconfigure_profile">Reconfigure device</string>
     <string name="profiles_reconfigure_cancel">Cancel</string>
+    <string name="profiles_profile_configured">Configured</string>
     <string name="configuration_progress">Establishing WiFi connection</string>
     <string name="configuration_waiting_for_user_credentials">Waiting for user credentials…</string>
     <string name="configuration_android_10_notification_disclaimer">Android 10 requires you to accept the new Wi-Fi networks via a Silent notification. See your notifications section to connect to the new networks.</string>
@@ -92,17 +95,8 @@
     <string name="passphrase_accessibility_hide_passphrase">Hide passphrase</string>
     <string name="passphrase_accessibility_show_passphrase">Show passphrase</string>
 
-    <string name="status_authenticated_by">You are authenticated by:\n%s</string>
-    <string name="status_account_valid_in_future">You have access until %1$s <b>(in %2$s)</b></string>
-    <string name="status_account_valid_in_past">You had access until %1$s <b>(%2$s ago)</b></string>
-    <string name="status_select_different_organization">Select a different organization</string>
-    <string name="status_reauthenticate_my_account">Reauthenticate my account</string>
-    <string name="status_update_my_password">Update my password</string>
-    <string name="status_repair">Repair</string>
-    <string name="status_renew_my_accout">Renew my account</string>
-    <string name="status_show_debug_options">Show debug options</string>
-    <string name="status_username_label">Username: </string>
-    <string name="status_ssid_label">SSID: </string>
+    <string name="profile_status_account_valid_in_future"><![CDATA[You have access until %1$s <b>(in %2$s)</b>]]></string>
+    <string name="profile_status_account_valid_in_past"><![CDATA[You had access until %1$s <b>(%2$s ago)</b>]]></string>
 
     <plurals name="time_years">
         <item quantity="one">year</item>

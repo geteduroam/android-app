@@ -1,6 +1,5 @@
 package app.eduroam.geteduroam.profile
 
-import android.net.Uri
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.config.model.Helpdesk
 import app.eduroam.geteduroam.config.model.ProviderInfo
