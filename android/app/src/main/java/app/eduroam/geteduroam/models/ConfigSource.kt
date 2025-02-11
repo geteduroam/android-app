@@ -1,4 +1,4 @@
-package app.eduroam.geteduroam.status
+package app.eduroam.geteduroam.models
 
 enum class ConfigSource {
     File,

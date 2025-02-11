@@ -12,6 +12,7 @@ plugins {
     id("com.google.firebase.appdistribution")
     id("com.google.firebase.crashlytics")
     alias(libs.plugins.play.publisher)
+    alias(libs.plugins.compose.compiler)
 }
 
 if (JavaVersion.current() < JavaVersion.VERSION_17) {

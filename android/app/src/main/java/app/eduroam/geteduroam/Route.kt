@@ -9,7 +9,8 @@ import androidx.navigation.NavType
 import app.eduroam.geteduroam.config.AndroidConfigParser
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.models.Configuration
-import app.eduroam.geteduroam.status.ConfigSource
+import app.eduroam.geteduroam.models.ConfigSource
+import app.eduroam.geteduroam.organizations.ConfiguredOrganization
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
@@ -66,6 +67,36 @@ object NavTypes {
             bundle.putString(key, value.name)
         }
     }
+
+    val ConfiguredOrganizationNavType = object: NavType<ConfiguredOrganization>(isNullableAllowed = false) {
+        override fun get(bundle: Bundle, key: String): ConfiguredOrganization? {
+            val string = bundle.getString(key)
+            return if (string.isNullOrEmpty()) {
+                null
+            } else {
+                val decodedString = Uri.decode(string)
+                Json.decodeFromString(decodedString)
+            }
+        }
+
+        override fun parseValue(value: String): ConfiguredOrganization {
+            val decoded = Uri.decode(value)
+            return Json.decodeFromString(decoded)
+        }
+
+        override fun serializeAsValue(value: ConfiguredOrganization): String {
+            val string = Json.encodeToString(value)
+            return Uri.encode(string)
+
+        }
+
+        override fun put(bundle: Bundle, key: String, value: ConfiguredOrganization) {
+            val string = Json.encodeToString(value)
+            val encodedString = Uri.encode(string)
+            bundle.putString(key, encodedString)
+        }
+    }
+
     val EAPIdentityProviderListNavType = object: NavType<EAPIdentityProviderList>(isNullableAllowed = false) {
         override fun get(bundle: Bundle, key: String): EAPIdentityProviderList? {
             val string = bundle.getString(key)
@@ -98,7 +129,8 @@ object NavTypes {
     val allTypesMap = mapOf(
         typeOf<Configuration>() to ConfigurationNavType,
         typeOf<EAPIdentityProviderList>() to EAPIdentityProviderListNavType,
-        typeOf<ConfigSource>() to ConfigSourceNavType
+        typeOf<ConfigSource>() to ConfigSourceNavType,
+        typeOf<ConfiguredOrganization>() to ConfiguredOrganizationNavType
     )
 }
 
@@ -116,9 +148,8 @@ sealed class Route {
     data class WebViewFallback(val configuration: Configuration, val urlToLoad: String) : Route()
     @Serializable
     data class ConfigureWifi(
-        val source: ConfigSource,
-        val organizationId: String,
-        val organizationName: String?,
+        val configuredOrganization: ConfiguredOrganization,
+        val configuredProfileId: String?,
         val eapIdentityProviderList: EAPIdentityProviderList
     ): Route() {
         companion object {
@@ -130,7 +161,12 @@ sealed class Route {
                 return@withContext try {
                     val provider = configParser.parse(bytes)
                     inputStream.close()
-                    ConfigureWifi(ConfigSource.File, "", null, provider)
+                    ConfigureWifi(ConfiguredOrganization(
+                        source = ConfigSource.File,
+                        id = provider.eapIdentityProvider?.firstOrNull()?.ID ?: ConfiguredOrganization.ID_ORGANIZATION_FROM_FILE,
+                        name = null,
+                        country = null
+                    ), null, provider)
                 } catch (ex: Exception) {
                     Timber.w(ex, "Could not parse file opened!")
                     null

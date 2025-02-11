@@ -25,6 +25,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -37,7 +38,7 @@ class SelectProfileViewModel @Inject constructor(
     @ApplicationContext context: Context,
     savedStateHandle: SavedStateHandle,
     val api: GetEduroamApi,
-    private val repository: StorageRepository,
+    private val storageRepository: StorageRepository,
 ) : ViewModel() {
 
     private val parser = AndroidConfigParser()
@@ -47,7 +48,9 @@ class SelectProfileViewModel @Inject constructor(
     val institutionId: String?
 
     val customHost: Uri?
+
     private var didAgreeToTerms = false
+    private var previouslyConfiguredProfileId: String? = null
 
     init {
         val data = savedStateHandle.toRoute<Route.SelectProfile>(NavTypes.allTypesMap)
@@ -65,6 +68,17 @@ class SelectProfileViewModel @Inject constructor(
                 )
             )
         }
+        viewModelScope.launch {
+            val configuredOrganization = storageRepository.configuredOrganization.first()
+            if (institutionId == configuredOrganization?.id) {
+                previouslyConfiguredProfileId = storageRepository.configuredProfileLastConfig.firstOrNull()?.first
+                val profileExpiryTimestampMs = storageRepository.profileExpiryTimestampMs.first()
+                uiState = uiState.copy(
+                    configuredOrganization = configuredOrganization,
+                    profileExpiryTimestampMs = profileExpiryTimestampMs
+                )
+            }
+        }
     }
 
     private fun loadDataFromInstitution() = viewModelScope.launch {
@@ -78,18 +92,29 @@ class SelectProfileViewModel @Inject constructor(
             response.body()
         } catch (ex: Exception) {
             Timber.w(ex, "Could not fetch organizations!")
+            if (responseError == null) {
+                responseError = ex.message
+            }
             null
         }
         if (institutionResult != null) {
             val selectedInstitution = institutionResult.content.institutions.find { it.id == institutionId }
             if (selectedInstitution != null) {
                 val isSingleProfile = selectedInstitution.profiles.size == 1
-                var isFirstProfile = true
+                val profileIdToSelect  = if (previouslyConfiguredProfileId != null) {
+                    previouslyConfiguredProfileId
+                } else {
+                    selectedInstitution.profiles.firstOrNull()?.id
+                }
                 val presentProfiles = selectedInstitution.profiles.map { profile ->
                     val result: PresentProfile
                     if (profile.type == Profile.Type.letswifi) {
                         try {
-                            result = PresentProfile(profile = resolveLetswifiProfile(profile), isSelected = isFirstProfile)
+                            result = PresentProfile(
+                                profile = resolveLetswifiProfile(profile),
+                                isConfigured = previouslyConfiguredProfileId == profile.id,
+                                isSelected = profileIdToSelect == profile.id
+                            )
                         } catch (ex: Exception) {
                             Timber.w(ex, "Could not fetch letswifi profile!")
                             uiState = uiState.copy(
@@ -102,19 +127,23 @@ class SelectProfileViewModel @Inject constructor(
                             return@launch
                         }
                     } else {
-                        result = PresentProfile(profile = profile, isSelected = isFirstProfile)
+                        result = PresentProfile(
+                            profile = profile,
+                            isConfigured = previouslyConfiguredProfileId == profile.id,
+                            isSelected = profileIdToSelect == profile.id
+                        )
                     }
-                    isFirstProfile = false
                     result
                 }
+                val autoConnectWithSingleProfile = isSingleProfile && !presentProfiles[0].isConfigured
                 uiState = uiState.copy(
-                    inProgress = isSingleProfile,
+                    inProgress = autoConnectWithSingleProfile,
                     profiles = presentProfiles,
                     organization = PresentOrganization(
                         name = selectedInstitution.getLocalizedName(), location = selectedInstitution.country
                     )
                 )
-                if (isSingleProfile) {
+                if (autoConnectWithSingleProfile) {
                     Timber.i("Single profile for institution. Continue with configuration")
                     connectWithProfile(presentProfiles[0].profile, startOAuthFlowIfNoAccess = true)
                 }
@@ -174,7 +203,6 @@ class SelectProfileViewModel @Inject constructor(
 
     }
 
-
     private suspend fun resolveLetswifiProfile(letswifiProfile: Profile): Profile {
         val endpoint = letswifiProfile.letswifiEndpoint
         if (endpoint.isNullOrEmpty()) {
@@ -193,6 +221,12 @@ class SelectProfileViewModel @Inject constructor(
     }
 
     fun setProfileSelected(profile: PresentProfile) {
+        val hasConfiguredProfile = uiState.profiles.any { it.isConfigured }
+        if (!profile.isSelected && hasConfiguredProfile && !profile.isConfigured) {
+            // We have a configured profile, and the user selected a different one
+            uiState = uiState.copy(showAlertForConfiguringDifferentProfile = profile)
+            return
+        }
         uiState = uiState.copy(
             profiles = uiState.profiles.map {
                 it.copy(isSelected = it.profile == profile.profile)
@@ -215,9 +249,9 @@ class SelectProfileViewModel @Inject constructor(
             if (profile.oauth) {
                 Timber.i("Selected profile requires authentication.")
 
-                if (repository.isAuthenticatedForConfig(profile.createConfiguration())) {
+                if (storageRepository.isAuthenticatedForConfig(profile.createConfiguration())) {
                     Timber.i("Already authenticated for this profile, continue with existing credentials")
-                    val authState = repository.authState.first()
+                    val authState = storageRepository.authState.first()
                     viewModelScope.launch(Dispatchers.IO) {
                         getEapFrom(profile.eapconfigEndpoint, authState?.accessToken?.let { "Bearer $it" })
                     }
@@ -336,7 +370,7 @@ class SelectProfileViewModel @Inject constructor(
     }
 
     fun errorDataShown() {
-        uiState = uiState.copy(errorData = null)
+        uiState = uiState.copy(errorData = null, showAlertForConfiguringDifferentProfile = null)
     }
 
     /**
@@ -367,5 +401,16 @@ class SelectProfileViewModel @Inject constructor(
 
     fun didGoToConfigScreen() {
         uiState = uiState.copy(goToConfigScreenWithProviderList = null)
+    }
+
+    fun resetConfigurationAndSelectProfile(presentProfile: PresentProfile) {
+        previouslyConfiguredProfileId = null
+        uiState = uiState.copy(
+            profiles = uiState.profiles.map { it.copy(isConfigured = false, isSelected = presentProfile == it) }
+        )
+    }
+
+    fun requestReconfiguration() {
+        uiState = uiState.copy(showAlertForConfiguringDifferentProfile = uiState.profiles.firstOrNull { it.isConfigured })
     }
 }

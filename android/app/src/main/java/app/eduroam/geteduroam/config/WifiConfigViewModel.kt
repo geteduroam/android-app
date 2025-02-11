@@ -10,7 +10,6 @@ import android.net.wifi.hotspot2.PasspointConfiguration
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.SavedStateHandle
@@ -22,7 +21,8 @@ import app.eduroam.geteduroam.Route
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.di.repository.NotificationRepository
 import app.eduroam.geteduroam.di.repository.StorageRepository
-import app.eduroam.geteduroam.status.ConfigSource
+import app.eduroam.geteduroam.models.ConfigSource
+import app.eduroam.geteduroam.organizations.ConfiguredOrganization
 import app.eduroam.geteduroam.ui.theme.IS_EDUROAM
 import app.eduroam.geteduroam.ui.theme.isChromeOs
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -40,9 +40,8 @@ class WifiConfigViewModel @Inject constructor(
 ) : ViewModel() {
 
     val eapIdentityProviderList: EAPIdentityProviderList
-    val organizationId: String
-    val source: ConfigSource
-    val organizationName: String?
+    val configuredOrganization: ConfiguredOrganization
+    val configuredProfileId: String? // Can be null if configured from file
 
     val launch: MutableStateFlow<Unit?> = MutableStateFlow(null)
     val progressMessage = MutableStateFlow("")
@@ -59,9 +58,8 @@ class WifiConfigViewModel @Inject constructor(
         launch.value = Unit
         val data = savedStateHandle.toRoute<Route.ConfigureWifi>(NavTypes.allTypesMap)
         eapIdentityProviderList = data.eapIdentityProviderList
-        organizationId = data.organizationId
-        source = data.source
-        organizationName = data.organizationName
+        configuredProfileId = data.configuredProfileId
+        configuredOrganization = data.configuredOrganization
     }
 
     fun launchConfiguration(context: Context, fallbackToSuggestions: Boolean = false) = viewModelScope.launch {
@@ -330,25 +328,24 @@ class WifiConfigViewModel @Inject constructor(
 
     fun shouldRequestPushPermission(): Boolean {
         eapIdentityProviderList.eapIdentityProvider?.firstOrNull()?.let {
-            return notificationRepository.shouldRequestPushPermission(it, organizationId)
+            return notificationRepository.shouldRequestPushPermission(it, configuredOrganization.id)
         }
         return false
     }
 
     fun scheduleReminderNotification() {
         eapIdentityProviderList.eapIdentityProvider?.firstOrNull()?.let {
-            notificationRepository.scheduleNotificationIfNeeded(it, organizationId)
+            notificationRepository.scheduleNotificationIfNeeded(it, configuredOrganization.id)
         }
     }
 
     fun saveConfigForStatusScreen() {
         viewModelScope.launch {
             storageRepository.saveConfigForStatusScreen(
-                organizationId = organizationId,
-                organizationName = organizationName ?: eapIdentityProviderList.eapIdentityProvider?.firstOrNull()?.providerInfo?.displayName,
+                configuredOrganization = configuredOrganization,
+                configuredProfileId = configuredProfileId,
                 expiryTimestampMs = eapIdentityProviderList.eapIdentityProvider?.firstOrNull()?.validUntil?.time,
-                config = eapIdentityProviderList,
-                source = source
+                config = eapIdentityProviderList
             )
         }
     }

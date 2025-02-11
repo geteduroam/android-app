@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -56,7 +57,8 @@ import app.eduroam.geteduroam.R
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.models.Configuration
 import app.eduroam.geteduroam.models.Organization
-import app.eduroam.geteduroam.status.ConfigSource
+import app.eduroam.geteduroam.models.ConfigSource
+import app.eduroam.geteduroam.models.Organization.Companion.LANGUAGE_KEY_FALLBACK
 import app.eduroam.geteduroam.ui.ErrorData
 import app.eduroam.geteduroam.ui.theme.AppTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -67,7 +69,7 @@ fun SelectOrganizationScreen(
     viewModel: SelectOrganizationViewModel,
     openProfileModal: (String) -> Unit,
     goToOAuth: (Configuration) -> Unit,
-    goToConfigScreen: (ConfigSource, String, String, EAPIdentityProviderList) -> Unit,
+    goToConfigScreen: (ConfiguredOrganization, String?, EAPIdentityProviderList) -> Unit,
     openFileUri: (Uri) -> Unit,
     discoverUrl: (Uri) -> Unit
 ) {
@@ -85,9 +87,8 @@ fun SelectOrganizationScreen(
             is Step.DoConfig -> {
                 viewModel.onStepCompleted()
                 goToConfigScreen(
-                    currentStep.source,
-                    currentStep.organizationId,
-                    currentStep.organizationName,
+                    currentStep.configuredOrganization,
+                    currentStep.configuredProfileId,
                     currentStep.eapIdentityProviderList)
             }
 
@@ -98,6 +99,13 @@ fun SelectOrganizationScreen(
             Step.Start -> {
                 //Do nothing
             }
+        }
+    }
+    LaunchedEffect(viewModel.uiState.configuredOrganization) {
+        val organizationId = viewModel.uiState.configuredOrganization?.id
+        if (organizationId != null && !viewModel.uiState.didShowConfiguredOrganization) {
+            viewModel.configuredProfileModalShown()
+            openProfileModal(organizationId)
         }
     }
     if (waitForVmEvent) {
@@ -116,6 +124,7 @@ fun SelectOrganizationScreen(
 
     SelectOrganizationContent(
         organizations = viewModel.uiState.organizations,
+        configuredOrganization = viewModel.uiState.configuredOrganization,
         isLoading = viewModel.uiState.isLoading,
         onSelectOrganization = { organization ->
             waitForVmEvent = true
@@ -138,6 +147,7 @@ fun SelectOrganizationScreen(
 @Composable
 fun SelectOrganizationContent(
     organizations: List<Organization> = emptyList(),
+    configuredOrganization: ConfiguredOrganization? = null,
     isLoading: Boolean = false,
     showDialog: Boolean = false,
     errorData: ErrorData? = null,
@@ -231,12 +241,18 @@ fun SelectOrganizationContent(
             LazyColumn(Modifier.weight(1f)) {
                 if (errorData != null) {
                     item {
-                        Text(
-                            modifier = Modifier.padding(16.dp),
-                            text = errorData.title(context),
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+                        Column {
+                            Text(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                text = errorData.title(context),
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Spacer(Modifier.height(24.dp))
+                        }
                     }
                 } else {
                     if (showConnectCta) {
@@ -284,9 +300,24 @@ fun SelectOrganizationContent(
                             }
                         } else {
                             items(organizations) { organization ->
-                                OrganizationRow(organization, onSelectOrganization)
+                                val isSaved = organization.id == configuredOrganization?.id
+                                OrganizationRow(organization, isSaved, onSelectOrganization)
                             }
                         }
+                    }
+                }
+                if (searchText.isEmpty() && configuredOrganization != null) {
+                    item {
+                        OrganizationRow(
+                            Organization(
+                                country = configuredOrganization.country ?: "",
+                                id = configuredOrganization.id,
+                                name = mapOf(LANGUAGE_KEY_FALLBACK to (configuredOrganization.name ?: configuredOrganization.id)),
+                                profiles = emptyList()
+                            ),
+                            isSavedOrganization = true,
+                            onSelectOrganization
+                        )
                     }
                 }
             }

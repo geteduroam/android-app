@@ -21,9 +21,9 @@ val govroamLightThemeSurface = Color(0xFFC1EBF0)
 val govroamLightThemeSecondary = Color(0xFF202020)
 val govroamLightThemePrimaryContainer = Color(0xFFE77007)
 
-val govroamDarkThemePrimary = Color(0xFF7ad0ff)
+val govroamDarkThemePrimary = Color(0xFFC4E9FF)
 val govroamDarkThemeOnSurface = Color(0xFFffffff)
-val govroamDarkThemeSurface = Color(0xFF23A2B2)
+val govroamDarkThemeSurface = Color(0xFF1893A2)
 val govroamDarkThemeSecondary = Color(0xFFFFFFFF)
 val govroamDarkThemePrimaryContainer = Color(0xFFE77007)
 
