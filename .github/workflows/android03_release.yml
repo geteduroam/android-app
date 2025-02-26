@@ -63,7 +63,7 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
-      - name: Build  & upload the release version of the app
+      - name: Build & upload the release version of the app
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ./firebase.json
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSPHRASE }}
@@ -71,12 +71,13 @@ jobs:
           echo "Check firebase credentials here"
           cat ./firebase.json
           echo $GOOGLE_APPLICATION_CREDENTIALS
-          ./gradlew :android:app:assembleRelease :android:app:appDistributionUploadRelease
+          ./gradlew :android:app:assembleGooglePlayRelease :android:app:appDistributionUploadGooglePlayRelease
 
-      - name: Push tag for snapshot
+      - name: Push tag and F-Droid changelog for snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git push --tags
+          git push origin HEAD:main

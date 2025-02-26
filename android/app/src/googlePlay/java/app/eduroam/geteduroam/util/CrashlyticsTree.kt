@@ -10,12 +10,12 @@ import timber.log.Timber
 class CrashlyticsTree : Timber.Tree() {
 
     private val priorityStr = mapOf(
-            Log.VERBOSE to "V",
-            Log.DEBUG to "D",
-            Log.INFO to "I",
-            Log.WARN to "W",
-            Log.ERROR to "E",
-            Log.ASSERT to "A"
+        Log.VERBOSE to "V",
+        Log.DEBUG to "D",
+        Log.INFO to "I",
+        Log.WARN to "W",
+        Log.ERROR to "E",
+        Log.ASSERT to "A"
     )
 
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {

@@ -20,9 +20,9 @@ import androidx.core.view.WindowCompat
 import app.eduroam.geteduroam.BuildConfig
 
 @Suppress("KotlinConstantConditions")
-const val IS_EDUROAM = BuildConfig.FLAVOR == "eduroam"
+const val IS_EDUROAM = BuildConfig.FLAVOR_brand == "eduroam"
 @Suppress("KotlinConstantConditions")
-const val IS_GOVROAM = BuildConfig.FLAVOR == "govroam"
+const val IS_GOVROAM = BuildConfig.FLAVOR_brand == "govroam"
 
 fun Context.isChromeOs() : Boolean {
     return packageManager.hasSystemFeature("org.chromium.arc.device_management")

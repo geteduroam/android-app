@@ -84,6 +84,7 @@ android {
     }
 
     flavorDimensions.add("brand")
+    flavorDimensions.add("distribution")
 
     productFlavors {
         create("eduroam") {
@@ -101,6 +102,14 @@ android {
             manifestPlaceholders += mapOf(
                 "appAuthRedirectScheme" to "app.govroam.getgovroam"
             )
+        }
+        create("fdroid") {
+            dimension = "distribution"
+            buildConfigField("Boolean", "CRASHLYTICS_ENABLED", "false")
+        }
+        create("googlePlay") {
+            dimension = "distribution"
+            buildConfigField("Boolean", "CRASHLYTICS_ENABLED", "true")
         }
     }
 
@@ -130,6 +139,8 @@ android {
 play {
     track = "internal"
 }
+
+val googlePlayImplementation by configurations
 
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -175,8 +186,8 @@ dependencies {
 
     // Firebase
     val firebaseBom = platform(libs.firebase.bom)
-    implementation(firebaseBom)
-    implementation(libs.firebase.crashlytics)
+    googlePlayImplementation(firebaseBom)
+    googlePlayImplementation(libs.firebase.crashlytics)
 
 
     //Hilt dependencies
