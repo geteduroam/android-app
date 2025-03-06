@@ -1,0 +1,3 @@
+In this version the autocompletion and possible enforcement of a realm was improved. There is now an embedded browser for users that installed some custom browsers.
+Some translations were updated. Search was improved, and a long-press on the Search icon now also allows to load a previously downloaded .eap-config.
+The app now uses a newer version of the discovery backend, and had some other minor fixes.
