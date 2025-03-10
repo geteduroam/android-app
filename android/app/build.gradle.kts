@@ -48,7 +48,7 @@ android {
         firebaseAppDistribution {
             appId = System.getenv("FIREBASE_APP_ID")
             artifactType = "APK"
-            releaseNotesFile = "${buildDir}/release_notes.txt"
+            releaseNotesFile = "android/app/build/release_notes.txt"
             groups = "all-testers"
         }
     }
