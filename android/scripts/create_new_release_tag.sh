@@ -19,7 +19,7 @@ git tag -a "v${VERSION}" -m "$(cat "${RELEASE_NOTES_FILE}")"
 
 # Create F-Droid release notes
 FDROID_CHANGELOG_FILE="metadata/en-US/changelogs/${BUILD_NUMBER}.txt"
-mv "${RELEASE_NOTES_FILE}" "$FDROID_CHANGELOG_FILE"
+cp "${RELEASE_NOTES_FILE}" "$FDROID_CHANGELOG_FILE"
 git add "$FDROID_CHANGELOG_FILE"
 git commit -m "Add F-Droid changelog for ${RELEASE_GIT_TAG}"
 git push -u origin main
