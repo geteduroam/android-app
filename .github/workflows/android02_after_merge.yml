@@ -16,7 +16,7 @@ jobs:
     build:
         name: Build release version of the project
         runs-on: ubuntu-latest
-        timeout-minutes: 10
+        timeout-minutes: 15
         steps:
             -   name: Checkout repo including tags
                 uses: actions/checkout@v3
