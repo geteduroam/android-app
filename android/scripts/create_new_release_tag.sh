@@ -15,7 +15,7 @@ android/scripts/list_changes_since_last_release.sh "${RELEASE_TYPE}" >> "${RELEA
 
 git config user.name "github-actions"
 git config user.email "github-actions@github.com"
-git tag -a "v${VERSION}" -m "$(cat "${RELEASE_NOTES_FILE}")"
+git tag -a "v${VERSION}(${BUILD_NUMBER})" -m "$(cat "${RELEASE_NOTES_FILE}")"
 
 # Create F-Droid release notes
 FDROID_CHANGELOG_FILE="metadata/en-US/changelogs/${BUILD_NUMBER}.txt"

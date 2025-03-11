@@ -1,23 +1,17 @@
-geteduroam
+geteduroam Android app
 =================
 
-This is the repository for the a geteduroam KMP project.
+This is the repository for the a geteduroam Android project.
 
 # Software
 
 The following software is expected to be available:
 
-- [Android Studio](https://developer.android.com/studio/) (version 4.0 or newer)
-- [Visual Studio Code](https://code.visualstudio.com) (version 1.48 or newer)
+- [Android Studio](https://developer.android.com/studio/) (latest stable version)
 
-# Getting Started
+# How it works
 
-Implementation built based on existing documentation:
-
-- [ionic Architecture](https://github.com/geteduroam/ionic-app/blob/architecture/ARCHITECTURE.md)
-  The existing ionic app architecture documentation
-
-The app will download a discovery list from `https://discovery.eduroam.app/v1/discovery.json`, and
+The app will download a discovery list from `https://discovery.eduroam.app/v2/discovery.json`, and
 present a searchable list of all institutions to the user. We filter on name and keywords (no
 abbreviations available for now).
 
@@ -52,19 +46,16 @@ The authorization flow and parsing of the xml data must be handled by each platf
 
 # Technical Design
 
-## shared
-
-## Android
-
 [Wi-Fi infrastructure](https://developer.android.com/guide/topics/connectivity/wifi-infrastructure)
 "On Android 10 and higher, the Wi-Fi infrastructure includes the Wi-Fi suggestion API for internet
 connectivity [...]. On Android 11 and higher, the Settings Intent API enables you to ask the user to
 approve adding a saved network or Passpoint configuration."
 
+In general the app will use the following APIs for createing the WiFI configuration:
+
 * Android >= Android 11 (API 30) use an intent with action `ACTION_WIFI_ADD_NETWORKS` (
   avaialble only starting from API 30). Pass the `WifiNetworkSuggestion` including passpoint
   configuration if available to the intent bundle.
-
 
 * Android == Android 10 (API 29) the Wifi Suggestion API is available, but not
   the `ACTION_WIFI_ADD_NETWORKS` for the intent, therefor must use
@@ -73,13 +64,12 @@ approve adding a saved network or Passpoint configuration."
   removed before hand. These calls may change the networks state and the permission
   for `CHANGE_WIFI_STATE` is required if not granted.
 
-> = Android 12 (API 31)
-> extra privacy & security settings:
-> setMacRandomizationSetting
-> isPasspointTermsAndConditionsSupported()
-> isDecoratedIdentitySupported()
+However, there are some exceptions:
+- When the WiFi intent could not be opened, the app will try to fall back to the older WiFi suggestion API.
+- On ChomeOS, the intent will contain the Passpoint and regular WiFi network config, while on regular Android phone and tablets,
+  Passpoint will be added using the suggestion API, because otherwise it doesn't work
 
-NB:
-w.r.t. `public void addOrUpdatePasspointConfiguration (PasspointConfiguration config)`
-"Compatibility Note: For applications targeting Build.VERSION_CODES.R or above, this API will always
-fail and throw IllegalArgumentException."
+# F-Droid
+
+The app is available on F-Droid, the open-source app store. The app is built with the `fdroid` flavor in this case, which disabled Firebase Crashlytics reporting.
+When a new update of this app is made, it won't automatically be done in F-Droid, because the fdroiddata repository must be updated for that.
