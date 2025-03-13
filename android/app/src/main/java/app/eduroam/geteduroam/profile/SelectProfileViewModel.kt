@@ -183,7 +183,7 @@ class SelectProfileViewModel @Inject constructor(
             ))
             uiState = uiState.copy(
                 inProgress = true,
-                profiles = listOf(PresentProfile(profile, true)),
+                profiles = listOf(PresentProfile(profile = profile, isConfigured = false, isSelected = true)),
                 organization = PresentOrganization(
                     name = customHost?.host, location = ""
                 )
