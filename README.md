@@ -3,6 +3,13 @@ geteduroam Android app
 
 This is the repository for the a geteduroam Android project.
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/app.eduroam.geteduroam/)
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
+     alt="Get it on Google Play"
+     height="80">](https://play.google.com/store/apps/details?id=app.eduroam.geteduroam)
+
 # Software
 
 The following software is expected to be available:
@@ -71,5 +78,5 @@ However, there are some exceptions:
 
 # F-Droid
 
-The app is available on F-Droid, the open-source app store. The app is built with the `fdroid` flavor in this case, which disabled Firebase Crashlytics reporting.
+The app is built with the `fdroid` flavor in this case, which disabled Firebase Crashlytics reporting.
 When a new update of this app is made, it won't automatically be done in F-Droid, because the fdroiddata repository must be updated for that.
