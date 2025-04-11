@@ -21,5 +21,15 @@ git tag -a "v${VERSION}(${BUILD_NUMBER})" -m "$(cat "${RELEASE_NOTES_FILE}")"
 FDROID_CHANGELOG_FILE="metadata/en-US/changelogs/${BUILD_NUMBER}.txt"
 cp "${RELEASE_NOTES_FILE}" "$FDROID_CHANGELOG_FILE"
 git add "$FDROID_CHANGELOG_FILE"
-git commit -m "Add F-Droid changelog for ${RELEASE_GIT_TAG}"
+rm -rf metadata/en-US/images/
+rm -f metadata/en-US/full_description.txt
+rm -f metadata/en-US/short_description.txt
+cp -r metadata/getgovroam/ metadata/en-US/
+git commit -m "Add F-Droid changelog for ${RELEASE_GIT_TAG} [getgovroam]"
+rm -rf metadata/en-US/images/
+rm -f metadata/en-US/full_description.txt
+rm -f metadata/en-US/short_description.txt
+cp -r metadata/geteduroam/ metadata/en-US/
+git commit -m "Add F-Droid changelog for ${RELEASE_GIT_TAG} [geteduroam]"
+
 git push -u origin main
