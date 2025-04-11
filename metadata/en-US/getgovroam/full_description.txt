@@ -1,1 +1,0 @@
-After selecting the right govroam enabled organization and providing the user-credentials the govroam Wi-Fi network should be configured and ready to use.

@@ -24,13 +24,13 @@ git add "$FDROID_CHANGELOG_FILE"
 rm -rf metadata/en-US/images/
 rm -f metadata/en-US/full_description.txt
 rm -f metadata/en-US/short_description.txt
-cp -r metadata/getgovroam/ metadata/en-US/
+cp -r metadata/getgovroam/. metadata/en-US/
 git add --all
 git commit -m "Add F-Droid changelog for ${RELEASE_GIT_TAG} [getgovroam]"
 rm -rf metadata/en-US/images/
 rm -f metadata/en-US/full_description.txt
 rm -f metadata/en-US/short_description.txt
-cp -r metadata/geteduroam/ metadata/en-US/
+cp -r metadata/geteduroam/. metadata/en-US/
 git add --all
 git commit -m "Add F-Droid changelog for ${RELEASE_GIT_TAG} [geteduroam]"
 
