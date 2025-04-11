@@ -1,1 +1,1 @@
-Configure eduroam by using your institution profile
+Configure the govroam Wi-Fi network securely and correctly

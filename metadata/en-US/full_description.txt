@@ -1,3 +1,1 @@
-Configure the eduroam WiFi-network according to the profiles created for and by the institutions.
-
-After selecting the right (eduroam CAT) profile and providing the user credentials the eduroam network should be configured and ready to use.
+After selecting the right govroam enabled organization and providing the user-credentials the govroam Wi-Fi network should be configured and ready to use.
