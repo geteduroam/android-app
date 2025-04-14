@@ -1,4 +1,0 @@
-Release notes for version 2.1.0 (2659)
-================================
-6dac007 Merge pull request #120 from geteduroam/feature/GETEDUROAM-75
-470d9ab Merge pull request #119 from geteduroam/feature/GETEDUROAM-75
