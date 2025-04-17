@@ -18,8 +18,8 @@ git config user.email "github-actions@github.com"
 git tag -a "v${VERSION}(${BUILD_NUMBER})" -m "$(cat "${RELEASE_NOTES_FILE}")"
 
 # Create F-Droid release notes
-FDROID_CHANGELOG_FILE_GETEDUROAM="android/app/eduroam/play/release-notes/en-US/default.txt"
-FDROID_CHANGELOG_FILE_GETGOVROAM="android/app/govroam/play/release-notes/en-US/default.txt"
+FDROID_CHANGELOG_FILE_GETEDUROAM="android/app/src/eduroam/play/release-notes/en-US/default.txt"
+FDROID_CHANGELOG_FILE_GETGOVROAM="android/app/src/govroam/play/release-notes/en-US/default.txt"
 cp "${RELEASE_NOTES_FILE}" "$FDROID_CHANGELOG_FILE_GETEDUROAM"
 cp "${RELEASE_NOTES_FILE}" "$FDROID_CHANGELOG_FILE_GETGOVROAM"
 git add "$FDROID_CHANGELOG_FILE_GETEDUROAM"
