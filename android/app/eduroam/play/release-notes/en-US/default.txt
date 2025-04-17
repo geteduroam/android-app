@@ -1,5 +1,8 @@
-Release notes for version 2.1.2 (2664)
+Release notes for version 2.1.4 (2667)
 ================================
+25003e6 Merge pull request #130 from geteduroam/feature/GETEDUROAM-75
+b6c087c Merge pull request #129 from geteduroam/feature/GETEDUROAM-75
+cd79770 Merge pull request #128 from geteduroam/feature/GETEDUROAM-75
 44b5ba4 Merge pull request #127 from geteduroam/feature/GETEDUROAM-75
 c5231bb Merge pull request #126 from geteduroam/feature/GETEDUROAM-75
 44be291 Merge pull request #125 from Poussinou/patch-1
