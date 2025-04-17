@@ -18,20 +18,12 @@ git config user.email "github-actions@github.com"
 git tag -a "v${VERSION}(${BUILD_NUMBER})" -m "$(cat "${RELEASE_NOTES_FILE}")"
 
 # Create F-Droid release notes
-FDROID_CHANGELOG_FILE="metadata/en-US/changelogs/${BUILD_NUMBER}.txt"
-cp "${RELEASE_NOTES_FILE}" "$FDROID_CHANGELOG_FILE"
-git add "$FDROID_CHANGELOG_FILE"
-rm -rf metadata/en-US/images/
-rm -f metadata/en-US/full_description.txt
-rm -f metadata/en-US/short_description.txt
-cp -r metadata/getgovroam/. metadata/en-US/
-git add --all
-git commit -m "Add F-Droid changelog for ${RELEASE_GIT_TAG} [getgovroam]"
-rm -rf metadata/en-US/images/
-rm -f metadata/en-US/full_description.txt
-rm -f metadata/en-US/short_description.txt
-cp -r metadata/geteduroam/. metadata/en-US/
-git add --all
-git commit -m "Add F-Droid changelog for ${RELEASE_GIT_TAG} [geteduroam]"
+FDROID_CHANGELOG_FILE_GETEDUROAM="android/app/eduroam/play/release-notes/en-US/default.txt"
+FDROID_CHANGELOG_FILE_GETGOVROAM="android/app/govroam/play/release-notes/en-US/default.txt"
+cp "${RELEASE_NOTES_FILE}" "$FDROID_CHANGELOG_FILE_GETEDUROAM"
+cp "${RELEASE_NOTES_FILE}" "$FDROID_CHANGELOG_FILE_GETGOVROAM"
+git add "$FDROID_CHANGELOG_FILE_GETEDUROAM"
+git add "$FDROID_CHANGELOG_FILE_GETGOVROAM"
+git commit -m "Add F-Droid changelog for ${RELEASE_GIT_TAG}"
 
 git push -u origin main
