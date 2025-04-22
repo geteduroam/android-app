@@ -1,6 +1,6 @@
 [versions]
-android-sdk-compile = "34"
-android-sdk-target = "34"
+android-sdk-compile = "35"
+android-sdk-target = "35"
 android-sdk-min = "26"
 
 android-gradle-plugin = "8.7.3"

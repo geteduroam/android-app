@@ -33,7 +33,7 @@ val appName = if (versionNameFile.exists()) {
 }
 
 android {
-    compileSdkPreview = "UpsideDownCake"
+    compileSdk = libs.versions.android.sdk.compile.get().toInt()
     namespace = "app.eduroam.geteduroam"
 
     defaultConfig {
