@@ -29,10 +29,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType.Companion.Password
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -73,7 +76,9 @@ fun PassphraseDialog(
                 // Username / password input fields need to be LTR even in RTL languages
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                     TextField(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().semantics {
+                            contentType = Password
+                        },
                         value = passphrase,
                         onValueChange = {
                             passphrase = it

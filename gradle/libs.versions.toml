@@ -1,6 +1,6 @@
 [versions]
-android-sdk-compile = "34"
-android-sdk-target = "34"
+android-sdk-compile = "35"
+android-sdk-target = "35"
 android-sdk-min = "26"
 
 android-gradle-plugin = "8.7.3"
@@ -26,6 +26,7 @@ core-ktx = "1.12.0"
 activity-compose = "1.8.2"
 lifecycle = "2.8.3"
 coroutines = "1.9.0"
+compose-ui = "1.8.0"
 androidx-compose-bom = "2024.01.00"
 material3-version = "1.2.0-rc01"
 accompanist = "0.31.3-beta"
@@ -42,6 +43,7 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidx-compose-bom" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-ui-tool-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref="compose-ui" }
 androidx-compose-lifecycle-vm = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose" }
 androidx-compose-material = { module = "androidx.compose.material:material" }
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }

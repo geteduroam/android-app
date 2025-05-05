@@ -33,7 +33,7 @@ val appName = if (versionNameFile.exists()) {
 }
 
 android {
-    compileSdkPreview = "UpsideDownCake"
+    compileSdk = libs.versions.android.sdk.compile.get().toInt()
     namespace = "app.eduroam.geteduroam"
 
     defaultConfig {
@@ -148,6 +148,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.android.material)
     implementation(libs.androidx.navigation.runtime.ktx)
