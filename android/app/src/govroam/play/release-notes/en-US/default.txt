@@ -1,4 +1,3 @@
-Release notes for version 2.1.6 (2669)
+Release notes for version 2.1.6 (2670)
 ================================
-972e6e9 Merge pull request #132 from geteduroam/feature/GETEDUROAM-75
-e0353fb Merge pull request #131 from geteduroam/feature/GETEDUROAM-75
+167a4b7 Merge pull request #133 from Ronjar/main
