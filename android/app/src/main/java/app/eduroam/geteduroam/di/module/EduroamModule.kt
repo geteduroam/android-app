@@ -15,6 +15,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -57,7 +58,27 @@ internal object EduroamModule {
         if (BuildConfig.DEBUG) {
             builder.addInterceptor(loggingInterceptor)
         }
+        builder.addInterceptor(object: Interceptor {
+            override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
+                val request = chain.request()
+                @Suppress("KotlinConstantConditions")
+                val appName = if (BuildConfig.FLAVOR_brand == "eduroam") {
+                    "geteduroam-android"
+                } else {
+                    "getgovroam-android"
+                }
+                val device = android.os.Build.DEVICE
+                val model = android.os.Build.MODEL
+                val manufacturer = android.os.Build.MANUFACTURER
+                val androidVersion = android.os.Build.VERSION.RELEASE
+                val versionWithoutBuild = BuildConfig.VERSION_NAME.split("(").first()
 
+                val newRequest = request.newBuilder()
+                    .header("User-Agent", "$appName/${versionWithoutBuild} (${BuildConfig.VERSION_CODE}; Android ${androidVersion}; $manufacturer $device $model)")
+                    .build()
+                return chain.proceed(newRequest)
+            }
+        })
         return builder.build()
     }
 
