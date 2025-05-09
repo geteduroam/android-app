@@ -17,4 +17,6 @@ class CertData {
 
     @field:Attribute
     var encoding: String? = null
+
+    fun isSupported() = format == "X.509" && encoding == "base64" && !value.isNullOrEmpty()
 }
