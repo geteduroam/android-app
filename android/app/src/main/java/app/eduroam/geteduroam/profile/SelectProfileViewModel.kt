@@ -56,21 +56,9 @@ class SelectProfileViewModel @Inject constructor(
         val data = savedStateHandle.toRoute<Route.SelectProfile>(NavTypes.allTypesMap)
         institutionId = data.institutionId ?: ""
         customHost = data.customHostUri?.let { Uri.parse(it) }
-        if (institutionId.isNotBlank()) {
-            loadDataFromInstitution()
-        } else if (customHost != null) {
-            loadDataFromCustomHost(context)
-        } else {
-            uiState = uiState.copy(
-                inProgress = false, errorData = ErrorData(
-                    titleId = R.string.err_title_generic_fail,
-                    messageId = R.string.err_msg_invalid_organization_id
-                )
-            )
-        }
         viewModelScope.launch {
             val configuredOrganization = storageRepository.configuredOrganization.first()
-            if (institutionId == configuredOrganization?.id) {
+            if (institutionId == configuredOrganization?.id || customHost?.toString() == configuredOrganization?.id) {
                 previouslyConfiguredProfileId = storageRepository.configuredProfileLastConfig.firstOrNull()?.first
                 val profileExpiryTimestampMs = storageRepository.profileExpiryTimestampMs.first()
                 uiState = uiState.copy(
@@ -78,10 +66,22 @@ class SelectProfileViewModel @Inject constructor(
                     profileExpiryTimestampMs = profileExpiryTimestampMs
                 )
             }
+            if (institutionId.isNotBlank()) {
+                loadDataFromInstitution()
+            } else if (customHost != null) {
+                loadDataFromCustomHost(context)
+            } else {
+                uiState = uiState.copy(
+                    inProgress = false, errorData = ErrorData(
+                        titleId = R.string.err_title_generic_fail,
+                        messageId = R.string.err_msg_invalid_organization_id
+                    )
+                )
+            }
         }
     }
 
-    private fun loadDataFromInstitution() = viewModelScope.launch {
+    private suspend fun loadDataFromInstitution() {
         uiState = uiState.copy(inProgress = true)
         var responseError: String? = null
         val institutionResult: DiscoveryResult? = try {
@@ -124,7 +124,7 @@ class SelectProfileViewModel @Inject constructor(
                                     messageId = R.string.err_msg_could_not_discover_profile_configuration
                                 )
                             )
-                            return@launch
+                            return
                         }
                     } else {
                         result = PresentProfile(
@@ -172,7 +172,7 @@ class SelectProfileViewModel @Inject constructor(
         }
     }
 
-    private fun loadDataFromCustomHost(context: Context) = viewModelScope.launch {
+    private suspend fun loadDataFromCustomHost(context: Context) {
         uiState = uiState.copy(inProgress = true)
         try {
             val profile = resolveLetswifiProfile(Profile(
@@ -181,14 +181,17 @@ class SelectProfileViewModel @Inject constructor(
                 type = Profile.Type.letswifi,
                 letswifiEndpoint = customHost.toString()
             ))
+            val willAutoConnect = uiState.configuredOrganization == null
             uiState = uiState.copy(
-                inProgress = true,
+                inProgress = willAutoConnect,
                 profiles = listOf(PresentProfile(profile = profile, isConfigured = false, isSelected = true)),
                 organization = PresentOrganization(
                     name = customHost?.host, location = ""
                 )
             )
-            connectWithSelectedProfile()
+            if (willAutoConnect) {
+                connectWithSelectedProfile()
+            }
         } catch (ex: Exception) {
             Timber.w(ex, "Could not fetch letswifi profile!")
             uiState = uiState.copy(
@@ -198,9 +201,7 @@ class SelectProfileViewModel @Inject constructor(
                     messageId = R.string.err_msg_could_not_discover_profile_configuration
                 )
             )
-            return@launch
         }
-
     }
 
     private suspend fun resolveLetswifiProfile(letswifiProfile: Profile): Profile {

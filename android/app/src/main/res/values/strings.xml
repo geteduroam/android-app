@@ -97,6 +97,7 @@
 
     <string name="profile_status_account_valid_in_future"><![CDATA[You have access until %1$s <b>(in %2$s)</b>]]></string>
     <string name="profile_status_account_valid_in_past"><![CDATA[You had access until %1$s <b>(%2$s ago)</b>]]></string>
+    <string name="configuration_source_custom_host">Custom host</string>
 
     <plurals name="time_years">
         <item quantity="one">year</item>

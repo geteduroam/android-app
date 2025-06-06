@@ -123,7 +123,7 @@ fun SelectProfileScreen(
                 goToConfigScreen(
                     ConfiguredOrganization(
                         source = source,
-                        id = viewModel.institutionId!!,
+                        id = if (viewModel.customHost != null) viewModel.customHost.toString() else viewModel.institutionId!!,
                         name = viewModel.uiState.organization?.name,
                         country = viewModel.uiState.organization?.location
                     ),
