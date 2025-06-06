@@ -5,24 +5,18 @@ import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.SavedStateHandle
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
-import app.eduroam.geteduroam.NavTypes
 import app.eduroam.geteduroam.R
-import app.eduroam.geteduroam.Route
 import app.eduroam.geteduroam.config.AndroidConfigParser
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.di.api.GetEduroamApi
 import app.eduroam.geteduroam.di.repository.StorageRepository
 import app.eduroam.geteduroam.models.DiscoveryResult
-import app.eduroam.geteduroam.models.Organization
 import app.eduroam.geteduroam.models.Profile
 import app.eduroam.geteduroam.ui.ErrorData
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -35,8 +29,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SelectProfileViewModel @Inject constructor(
-    @ApplicationContext context: Context,
-    savedStateHandle: SavedStateHandle,
     val api: GetEduroamApi,
     private val storageRepository: StorageRepository,
 ) : ViewModel() {
@@ -45,18 +37,19 @@ class SelectProfileViewModel @Inject constructor(
 
     var uiState by mutableStateOf(UiState())
         private set
-    val institutionId: String?
 
-    val customHost: Uri?
+    var institutionId: String? = null
+        private set
+    var customHost: Uri? = null
+        private set
 
     private var didAgreeToTerms = false
     private var previouslyConfiguredProfileId: String? = null
 
-    init {
-        val data = savedStateHandle.toRoute<Route.SelectProfile>(NavTypes.allTypesMap)
-        institutionId = data.institutionId ?: ""
-        customHost = data.customHostUri?.let { Uri.parse(it) }
-        if (institutionId.isNotBlank()) {
+    fun setData(context: Context, institutionId: String?, customHostUri: String?) {
+        customHost = customHostUri?.let { it.toUri() }
+        this@SelectProfileViewModel.institutionId = institutionId
+        if (institutionId?.isNotBlank() == true) {
             loadDataFromInstitution()
         } else if (customHost != null) {
             loadDataFromCustomHost(context)

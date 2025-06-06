@@ -79,6 +79,8 @@ import java.util.Date
 @Composable
 fun SelectProfileScreen(
     viewModel: SelectProfileViewModel,
+    institutionId: String?,
+    customHostUri: String?,
     goToOAuth: (Configuration) -> Unit,
     goToConfigScreen: (ConfiguredOrganization, String?, EAPIdentityProviderList) -> Unit,
     goToPrevious: () -> Unit
@@ -89,6 +91,11 @@ fun SelectProfileScreen(
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val uriHandler = LocalUriHandler.current
     val currentGotoOauth by rememberUpdatedState(newValue = goToOAuth)
+    val context = LocalContext.current
+
+    LaunchedEffect(viewModel) {
+        viewModel.setData(context, institutionId, customHostUri)
+    }
 
     LaunchedEffect(viewModel, lifecycle) {
         snapshotFlow { viewModel.uiState }

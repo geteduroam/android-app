@@ -15,13 +15,10 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
-import app.eduroam.geteduroam.NavTypes
 import app.eduroam.geteduroam.Route
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.di.repository.NotificationRepository
 import app.eduroam.geteduroam.di.repository.StorageRepository
-import app.eduroam.geteduroam.models.ConfigSource
 import app.eduroam.geteduroam.organizations.ConfiguredOrganization
 import app.eduroam.geteduroam.ui.theme.IS_EDUROAM
 import app.eduroam.geteduroam.ui.theme.isChromeOs
@@ -29,19 +26,17 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.lang.UnsupportedOperationException
 import javax.inject.Inject
 
 @HiltViewModel
 class WifiConfigViewModel @Inject constructor(
     private val notificationRepository: NotificationRepository,
     private val storageRepository: StorageRepository,
-    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val eapIdentityProviderList: EAPIdentityProviderList
-    val configuredOrganization: ConfiguredOrganization
-    val configuredProfileId: String? // Can be null if configured from file
+    lateinit var eapIdentityProviderList: EAPIdentityProviderList
+    private lateinit var configuredOrganization: ConfiguredOrganization
+    private var configuredProfileId: String? = null // Can be null if configured from file
 
     val launch: MutableStateFlow<Unit?> = MutableStateFlow(null)
     val progressMessage = MutableStateFlow("")
@@ -56,10 +51,16 @@ class WifiConfigViewModel @Inject constructor(
 
     init {
         launch.value = Unit
-        val data = savedStateHandle.toRoute<Route.ConfigureWifi>(NavTypes.allTypesMap)
-        eapIdentityProviderList = data.eapIdentityProviderList
-        configuredProfileId = data.configuredProfileId
-        configuredOrganization = data.configuredOrganization
+    }
+
+    fun setData(
+        eapIdentityProviderList: EAPIdentityProviderList,
+        configuredOrganization: ConfiguredOrganization,
+        configuredProfileId: String? = null
+    ) {
+        this.eapIdentityProviderList = eapIdentityProviderList
+        this.configuredOrganization = configuredOrganization
+        this.configuredProfileId = configuredProfileId
     }
 
     fun launchConfiguration(context: Context, fallbackToSuggestions: Boolean = false) = viewModelScope.launch {
@@ -351,3 +352,4 @@ class WifiConfigViewModel @Inject constructor(
     }
 
 }
+

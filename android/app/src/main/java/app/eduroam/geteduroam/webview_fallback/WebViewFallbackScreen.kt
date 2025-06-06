@@ -21,11 +21,17 @@ import kotlinx.coroutines.flow.filter
 @Composable
 fun WebViewFallbackScreen(
     viewModel: WebViewFallbackViewModel,
+    configuration: Configuration,
+    urlToLoad: String,
     onRedirectUriFound: (Configuration, Uri) -> Unit,
     onCancel: () -> Unit
 ) = EduTopAppBar(onBackClicked = onCancel, title = stringResource(id = R.string.oauth_title)) {
 
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+
+    LaunchedEffect(viewModel) {
+        viewModel.setData(configuration, urlToLoad)
+    }
 
     LaunchedEffect(viewModel, lifecycle) {
         snapshotFlow { viewModel.uiState }

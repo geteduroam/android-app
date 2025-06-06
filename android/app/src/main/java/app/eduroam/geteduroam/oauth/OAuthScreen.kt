@@ -42,6 +42,8 @@ import app.eduroam.geteduroam.webview_fallback.WebViewDataHandlingActivity
 @Composable
 fun OAuthScreen(
     viewModel: OAuthViewModel,
+    configuration: Configuration,
+    redirectUri: Uri?,
     goToPrevious: () -> Unit,
     goToWebViewFallback: (Configuration, Uri) -> Unit,
 ) = EduTopAppBar(onBackClicked = goToPrevious) {
@@ -55,7 +57,9 @@ fun OAuthScreen(
                 isAuthorizationLaunched = false, isFetchingToken = true
             )
         })
-
+    LaunchedEffect(viewModel) {
+        viewModel.prepareAppAuth(configuration, context, redirectUri)
+    }
     LaunchedEffect(viewModel, lifecycle) {
         snapshotFlow { viewModel.uiState }
             .flowWithLifecycle(lifecycle)
@@ -91,7 +95,7 @@ fun OAuthScreen(
             launcher.launch(intentAvailable)
         },
         dismissError = viewModel::dismissError,
-        onRetry = { viewModel.prepareAppAuth(context, null) },
+        onRetry = { viewModel.prepareAppAuth(configuration, context, null) },
     )
 }
 

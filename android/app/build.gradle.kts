@@ -151,7 +151,8 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.android.material)
-    implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.androidx.compose.navigation3.ui)
+    implementation(libs.androidx.compose.navigation3.runtime)
     implementation(libs.androidx.splash.core)
     implementation(libs.timber)
 
@@ -179,10 +180,10 @@ dependencies {
     implementation(composeBom)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.ui.tool.preview)
-    implementation(libs.androidx.compose.lifecycle.vm)
+    implementation(libs.androidx.compose.lifecycle.vm.compose)
+    implementation(libs.androidx.compose.lifecycle.vm.navigation3)
 
-    //Compose navigation and hiltViewModel
-    implementation(libs.androidx.compose.navigation)
+    //Compose hiltViewModel
     implementation(libs.androidx.compose.hilt.navigation)
 
     // Firebase

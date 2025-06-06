@@ -3,7 +3,6 @@ package app.eduroam.geteduroam.oauth
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageInfo
 import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.util.Base64
@@ -12,25 +11,18 @@ import androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTI
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
-import app.eduroam.geteduroam.NavTypes
 import app.eduroam.geteduroam.R
-import app.eduroam.geteduroam.Route
 import app.eduroam.geteduroam.di.assist.AuthenticationAssistant
 import app.eduroam.geteduroam.di.repository.StorageRepository
 import app.eduroam.geteduroam.models.Configuration
 import app.eduroam.geteduroam.ui.ErrorData
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
-import net.openid.appauth.AuthorizationManagementActivity
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.AuthorizationService
@@ -44,15 +36,12 @@ import timber.log.Timber
 import java.security.MessageDigest
 import java.security.SecureRandom
 import javax.inject.Inject
-import kotlin.reflect.typeOf
 
 
 @HiltViewModel
 class OAuthViewModel @Inject constructor(
     private val repository: StorageRepository,
     private val assistant: AuthenticationAssistant,
-    @ApplicationContext context: Context,
-    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     var uiState by mutableStateOf(UiState(OAuthStep.Loading))
         private set
@@ -60,19 +49,11 @@ class OAuthViewModel @Inject constructor(
     private var service: AuthorizationService? = null
     private var configuration: Configuration = Configuration.EMPTY
 
-    init {
-        val data = savedStateHandle.toRoute<Route.OAuth>(NavTypes.allTypesMap)
-        configuration = data.configuration
-        val redirectUriArg = data.redirectUri ?: ""
-        val redirectUri = if (redirectUriArg.isNotEmpty()) {
-            Uri.parse(Uri.decode(redirectUriArg))
-        } else {
-            null
-        }
-        prepareAppAuth(context, redirectUri)
-    }
-
-    fun prepareAppAuth(context: Context, redirectUri: Uri?) = viewModelScope.launch {
+    fun prepareAppAuth(
+        configuration: Configuration,
+        context: Context,
+        redirectUri: Uri?) = viewModelScope.launch {
+        this@OAuthViewModel.configuration = configuration
         uiState = UiState(OAuthStep.Loading)
         try {
             checkIfConfigurationChanged()

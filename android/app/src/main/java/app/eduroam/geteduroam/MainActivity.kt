@@ -23,13 +23,13 @@ import kotlin.coroutines.CoroutineContext
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private var navController: NavController? = null
-
     private val job = Job()
     private val coroutineContext: CoroutineContext
         get() = job + Dispatchers.IO
 
     private val coroutineScope = CoroutineScope(coroutineContext)
+
+    private lateinit var backStack: MutableList<Route>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             AppTheme {
-                navController = MainGraph(
+                backStack = MainGraph(
                     closeApp = {
                         this@MainActivity.finish()
                     },
@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
         handleNewIntent(intent)
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleNewIntent(intent)
     }
@@ -83,10 +83,10 @@ class MainActivity : ComponentActivity() {
             } else if (intent?.hasExtra(NotificationRepository.KEY_EXTRA_PAYLOAD) == true) {
                 @Suppress("DEPRECATION")
                 intent.getParcelableExtra<Route.SelectProfile>(NotificationRepository.KEY_EXTRA_PAYLOAD)?.let { payload ->
-                    navController?.navigate(payload)
+                    backStack.add(payload)
                 }
-            } else {
-                navController?.handleDeepLink(intent)
+            } else if (intent?.dataString != null) {
+                Timber.w("Unexpected deeplink: ${intent?.dataString ?: "null"}")
             }
         }
     }
@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
     private suspend fun openFileUri(fileUri: Uri): Boolean {
         Route.ConfigureWifi.buildDeepLink(this@MainActivity, fileUri)?.let { entry ->
             return withContext(Dispatchers.Main) {
-                navController?.navigate(entry)
+                backStack.add(entry)
                 return@withContext true
             }
         }

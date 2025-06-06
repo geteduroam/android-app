@@ -1,9 +1,9 @@
 [versions]
-android-sdk-compile = "35"
-android-sdk-target = "35"
+android-sdk-compile = "36"
+android-sdk-target = "36"
 android-sdk-min = "26"
 
-android-gradle-plugin = "8.7.3"
+android-gradle-plugin = "8.10.0"
 androidx-junit = "1.1.5"
 espresso-core = "3.5.1"
 google-services-plugin = "4.4.2"
@@ -16,7 +16,7 @@ firebase-app-distribution-plugin = "4.0.0"
 firebase-crashlytics-gradle = "2.9.9"
 protobuf-plugin = "0.9.3"
 play-publisher-plugin = "3.8.6"
-compose-navigation = "2.8.4"
+compose-navigation3 = "1.0.0-alpha03"
 
 hilt-android = "2.52"
 hilt-navigation-compose = "1.2.0"
@@ -26,13 +26,14 @@ core-ktx = "1.12.0"
 activity-compose = "1.8.2"
 lifecycle = "2.8.3"
 coroutines = "1.9.0"
-compose-ui = "1.8.0"
-androidx-compose-bom = "2024.01.00"
-material3-version = "1.2.0-rc01"
+compose-ui = "1.8.2"
+androidx-compose-bom = "2025.06.00"
+material3-version = "1.3.2"
 accompanist = "0.31.3-beta"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
 kotlin-serialization = "1.7.1"
+viewmodel-navigation3 = "1.0.0-alpha01"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
@@ -44,7 +45,8 @@ androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", versi
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-ui-tool-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref="compose-ui" }
-androidx-compose-lifecycle-vm = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose" }
+androidx-compose-lifecycle-vm-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose" }
+androidx-compose-lifecycle-vm-navigation3 = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "viewmodel-navigation3" }
 androidx-compose-material = { module = "androidx.compose.material:material" }
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
@@ -54,14 +56,14 @@ simpleframework-xml-parser = "org.simpleframework:simple-xml:2.7.1"
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt-android" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt-android" }
 
-androidx-compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
+androidx-compose-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "compose-navigation3" }
+androidx-compose-navigation3-ui= { module = "androidx.navigation3:navigation3-ui", version.ref = "compose-navigation3" }
 androidx-compose-hilt-navigation = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
 androidx-splash-core = "androidx.core:core-splashscreen:1.0.1"
 android-material = { module = "com.google.android.material:material", version.ref = "android-material-version" }
 
 androidx-compose-debug-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-debug-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-androidx-navigation-runtime-ktx = { module = "androidx.navigation:navigation-runtime-ktx", version.ref = "compose-navigation"}
 
 timber = "com.jakewharton.timber:timber:5.0.1"
 

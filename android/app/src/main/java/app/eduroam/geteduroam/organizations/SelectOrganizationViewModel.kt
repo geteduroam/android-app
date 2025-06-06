@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.eduroam.geteduroam.R
@@ -24,7 +23,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SelectOrganizationViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
     private val api: GetEduroamApi,
     private val storageRepository: StorageRepository
 ) : ViewModel() {

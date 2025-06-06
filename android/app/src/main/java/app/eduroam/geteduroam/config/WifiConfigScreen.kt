@@ -41,6 +41,8 @@ import app.eduroam.geteduroam.EduTopAppBar
 import app.eduroam.geteduroam.R
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.di.repository.NotificationRepository
+import app.eduroam.geteduroam.models.ConfigSource
+import app.eduroam.geteduroam.organizations.ConfiguredOrganization
 import app.eduroam.geteduroam.organizations.PassphraseDialog
 import app.eduroam.geteduroam.organizations.UsernamePasswordDialog
 import app.eduroam.geteduroam.ui.PrimaryButton
@@ -53,6 +55,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun WifiConfigScreen(
     viewModel: WifiConfigViewModel,
+    eapIdentityProviderList: EAPIdentityProviderList,
+    configuredOrganization: ConfiguredOrganization,
+    configuredProfileId: String?,
     closeApp: () -> Unit,
     goBack: () -> Unit,
     snackbarHostState: SnackbarHostState = SnackbarHostState(),
@@ -65,6 +70,10 @@ fun WifiConfigScreen(
     val showUsernameDialog by viewModel.showUsernameDialog.collectAsState(false)
     val passphraseDialogRetryCount by viewModel.passphraseDialogRetryCount.collectAsState(0)
     val showPassphraseDialog by viewModel.showPassphraseDialog.collectAsState(false)
+
+    LaunchedEffect(viewModel) {
+        viewModel.setData(eapIdentityProviderList, configuredOrganization, configuredProfileId)
+    }
 
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -86,7 +95,7 @@ fun WifiConfigScreen(
             viewModel.consumeSuggestionIntent()
             try {
                 activityLauncher.launch(intent)
-            } catch (ex: SecurityException) {
+            } catch (_: SecurityException) {
                 // Fallback for Honor devices
                 if (!isRetryLaunch) {
                     viewModel.launchConfiguration(context, fallbackToSuggestions = true)
@@ -172,7 +181,9 @@ fun WifiConfigScreen(
             Spacer(modifier = Modifier.size(24.dp))
         }
         if (askNetworkPermission) {
-            AskForWiFiPermissions { viewModel.handleAndroid10WifiConfig(context) }
+            AskForWiFiPermissions {
+                viewModel.handleAndroid10WifiConfig(context)
+            }
         }
     }
     if (showUsernameDialog) {
@@ -298,7 +309,10 @@ private fun WifiConfigScreen_Preview() {
         WifiConfigScreen(
             viewModel = hiltViewModel(),
             closeApp = {},
-            goBack = {}
+            goBack = {},
+            eapIdentityProviderList = EAPIdentityProviderList(),
+            configuredOrganization = ConfiguredOrganization(source = ConfigSource.Discovery, "", null, null),
+            configuredProfileId = null,
         )
     }
 }
