@@ -28,11 +28,11 @@ import app.eduroam.geteduroam.models.Organization
 @Composable
 fun OrganizationRow(
     organization: Organization,
-    isSavedOrganization: Boolean,
-    onSelectOrganization: (Organization) -> Unit,
+    configuredOrganization: ConfiguredOrganization?,
+    onSelectOrganization: (Organization, ConfiguredOrganization?) -> Unit,
     modifier: Modifier = Modifier,
 ) = Surface(
-    modifier.clickable { onSelectOrganization(organization) },
+    modifier.clickable { onSelectOrganization(organization, configuredOrganization) },
     color = MaterialTheme.colorScheme.surface
 ) {
     Column(
@@ -63,7 +63,7 @@ fun OrganizationRow(
                 Spacer(Modifier.height(8.dp))
             }
             Spacer(Modifier.width(8.dp))
-            if (isSavedOrganization) {
+            if (configuredOrganization != null) {
                 Icon(
                     painterResource(R.drawable.ic_saved_organization),
                     contentDescription = "Saved organization indicator",

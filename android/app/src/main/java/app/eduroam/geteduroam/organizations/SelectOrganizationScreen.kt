@@ -63,6 +63,7 @@ import app.eduroam.geteduroam.ui.ErrorData
 import app.eduroam.geteduroam.ui.theme.AppTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import androidx.core.net.toUri
 
 @Composable
 fun SelectOrganizationScreen(
@@ -102,10 +103,16 @@ fun SelectOrganizationScreen(
         }
     }
     LaunchedEffect(viewModel.uiState.configuredOrganization) {
-        val organizationId = viewModel.uiState.configuredOrganization?.id
-        if (organizationId != null && !viewModel.uiState.didShowConfiguredOrganization) {
-            viewModel.configuredProfileModalShown()
-            openProfileModal(organizationId)
+        val configuredOrganization = viewModel.uiState.configuredOrganization
+        val organizationId = configuredOrganization?.id
+        if (!viewModel.uiState.didShowConfiguredOrganization) {
+            if (!organizationId.isNullOrEmpty() && configuredOrganization.source == ConfigSource.Discovery) {
+                viewModel.configuredProfileModalShown()
+                openProfileModal(organizationId)
+            } else if (!organizationId.isNullOrEmpty() && configuredOrganization.source == ConfigSource.Url) {
+                viewModel.configuredProfileModalShown()
+                discoverUrl(organizationId.toUri())
+            }
         }
     }
     if (waitForVmEvent) {
@@ -126,9 +133,13 @@ fun SelectOrganizationScreen(
         organizations = viewModel.uiState.organizations,
         configuredOrganization = viewModel.uiState.configuredOrganization,
         isLoading = viewModel.uiState.isLoading,
-        onSelectOrganization = { organization ->
+        onSelectOrganization = { organization, configuredOrganization ->
             waitForVmEvent = true
-            viewModel.onOrganizationSelect(organization)
+            if (configuredOrganization != null && configuredOrganization.source == ConfigSource.Url) {
+                discoverUrl(configuredOrganization.id.toUri())
+            } else {
+                viewModel.onOrganizationSelect(organization)
+            }
         },
         searchText = viewModel.uiState.filter,
         onSearchTextChange = { viewModel.onSearchTextChange(it) },
@@ -152,7 +163,7 @@ fun SelectOrganizationContent(
     showDialog: Boolean = false,
     errorData: ErrorData? = null,
     showConnectCta: Boolean = false,
-    onSelectOrganization: (Organization) -> Unit,
+    onSelectOrganization: (Organization, ConfiguredOrganization?) -> Unit,
     searchText: String,
     onSearchTextChange: (String) -> Unit = {},
     onClearDialog: () -> Unit = {},
@@ -300,8 +311,10 @@ fun SelectOrganizationContent(
                             }
                         } else {
                             items(organizations) { organization ->
-                                val isSaved = organization.id == configuredOrganization?.id
-                                OrganizationRow(organization, isSaved, onSelectOrganization)
+                                val matchingConfigured = configuredOrganization?.takeIf {
+                                    it.id == organization.id
+                                }
+                                OrganizationRow(organization, matchingConfigured, onSelectOrganization)
                             }
                         }
                     }
@@ -309,13 +322,13 @@ fun SelectOrganizationContent(
                 if (searchText.isEmpty() && configuredOrganization != null) {
                     item {
                         OrganizationRow(
-                            Organization(
-                                country = configuredOrganization.country ?: "",
+                            organization = Organization(
+                                country = if (configuredOrganization.source == ConfigSource.Url) stringResource(R.string.configuration_source_custom_host) else configuredOrganization.country ?: "",
                                 id = configuredOrganization.id,
                                 name = mapOf(LANGUAGE_KEY_FALLBACK to (configuredOrganization.name ?: configuredOrganization.id)),
                                 profiles = emptyList()
                             ),
-                            isSavedOrganization = true,
+                            configuredOrganization = configuredOrganization,
                             onSelectOrganization
                         )
                     }
@@ -355,7 +368,7 @@ fun SelectOrganizationContent(
 fun Preview_SelectOrganizationContent() {
     AppTheme {
         SelectOrganizationContent(
-            onSelectOrganization = {},
+            onSelectOrganization = { _, _ -> },
             searchText = ""
         )
     }
