@@ -56,6 +56,7 @@ import app.eduroam.geteduroam.EduTopAppBar
 import app.eduroam.geteduroam.R
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.config.model.ProviderInfo
+import app.eduroam.geteduroam.config.model.localizedMatch
 import app.eduroam.geteduroam.models.Configuration
 import app.eduroam.geteduroam.organizations.TermsOfUseDialog
 import app.eduroam.geteduroam.models.Profile
@@ -296,7 +297,7 @@ fun SelectProfileContent(
                         Column(
                             modifier = Modifier.fillMaxWidth(fraction = 1f)
                         ) {
-                            providerInfo.displayName?.let { displayName ->
+                            providerInfo.displayNames?.localizedMatch()?.let { displayName ->
                                 Text(
                                     text = displayName,
                                     style = MaterialTheme.typography.titleSmall,
@@ -325,7 +326,7 @@ fun SelectProfileContent(
                                     Spacer(modifier = Modifier.size(4.dp))
                                 }
                             }
-                            providerInfo.termsOfUse?.let { termsOfUse ->
+                            providerInfo.termsOfUse?.localizedMatch()?.let { termsOfUse ->
                                 Text(
                                     text = stringResource(id = R.string.terms_of_use_dialog_title),
                                     style = MaterialTheme.typography.titleSmall,

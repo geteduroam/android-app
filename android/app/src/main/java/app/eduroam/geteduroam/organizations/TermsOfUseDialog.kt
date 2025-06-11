@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import app.eduroam.geteduroam.R
 import app.eduroam.geteduroam.config.model.ProviderInfo
+import app.eduroam.geteduroam.config.model.localizedMatch
 import app.eduroam.geteduroam.extensions.removeNonSpacingMarks
 import app.eduroam.geteduroam.ui.LinkifyText
 
@@ -52,7 +53,7 @@ fun TermsOfUseDialog(
             )
             Spacer(modifier = Modifier.size(16.dp))
             var dialogDescription = stringResource(R.string.terms_of_use_dialog_text)
-            providerInfo?.termsOfUse?.let { termsOfUse ->
+            providerInfo?.termsOfUse?.localizedMatch()?.let { termsOfUse ->
                 dialogDescription += "\n\n" + termsOfUse.trim()
             }
             val topScrimAmount = 24.dp
