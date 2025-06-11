@@ -15,6 +15,7 @@ import app.eduroam.geteduroam.R
 import app.eduroam.geteduroam.Route
 import app.eduroam.geteduroam.config.AndroidConfigParser
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
+import app.eduroam.geteduroam.config.model.localizedMatch
 import app.eduroam.geteduroam.di.api.GetEduroamApi
 import app.eduroam.geteduroam.di.repository.StorageRepository
 import app.eduroam.geteduroam.models.DiscoveryResult
@@ -135,7 +136,7 @@ class SelectProfileViewModel @Inject constructor(
                     }
                     result
                 }
-                val autoConnectWithSingleProfile = isSingleProfile && !presentProfiles[0].isConfigured
+                val autoConnectWithSingleProfile = isSingleProfile && !presentProfiles[0].isConfigured && uiState.configuredOrganization == null
                 uiState = uiState.copy(
                     inProgress = autoConnectWithSingleProfile,
                     profiles = presentProfiles,
@@ -334,10 +335,10 @@ class SelectProfileViewModel @Inject constructor(
                 organization = PresentOrganization(
                     name = knownInstitution?.name,
                     location = knownInstitution?.location,
-                    displayName = info?.displayName,
-                    description = info?.description,
+                    displayName = info?.displayNames?.localizedMatch(),
+                    description = info?.descriptions?.localizedMatch(),
                     logo = info?.providerLogo?.value,
-                    termsOfUse = info?.termsOfUse,
+                    termsOfUse = info?.termsOfUse?.localizedMatch(),
                     helpDesk = info?.helpdesk
                 ),
                 providerInfo = info
