@@ -18,6 +18,7 @@ import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.config.model.localizedMatch
 import app.eduroam.geteduroam.di.api.GetEduroamApi
 import app.eduroam.geteduroam.di.repository.StorageRepository
+import app.eduroam.geteduroam.models.ConfigSource
 import app.eduroam.geteduroam.models.DiscoveryResult
 import app.eduroam.geteduroam.models.Organization
 import app.eduroam.geteduroam.models.Profile
@@ -65,6 +66,13 @@ class SelectProfileViewModel @Inject constructor(
                 uiState = uiState.copy(
                     configuredOrganization = configuredOrganization,
                     profileExpiryTimestampMs = profileExpiryTimestampMs
+                )
+            }
+            if (configuredOrganization?.source == ConfigSource.File) {
+                // We can only show the expiry, but no connect button or profiles
+                uiState = uiState.copy(
+                    inProgress = false,
+                    showConnectButton = false
                 )
             }
             if (institutionId.isNotBlank()) {

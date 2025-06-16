@@ -13,6 +13,7 @@ data class UiState(
     val configuredOrganization: ConfiguredOrganization? = null,
     val providerInfo: ProviderInfo? = null,
     val inProgress: Boolean = false,
+    val showConnectButton: Boolean = true,
     val errorData: ErrorData? = null,
     val promptForOAuth: Boolean = false,
     val checkProfileWhenResuming: Boolean = false,

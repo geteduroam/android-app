@@ -51,7 +51,6 @@ import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.flowWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import app.eduroam.geteduroam.EduTopAppBar
 import app.eduroam.geteduroam.R
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
@@ -152,6 +151,7 @@ fun SelectProfileScreen(
         configuredOrganization = viewModel.uiState.configuredOrganization,
         providerInfo = viewModel.uiState.providerInfo,
         inProgress = viewModel.uiState.inProgress,
+        showConnectButton = viewModel.uiState.showConnectButton,
         errorData = viewModel.uiState.errorData,
         showAlertForConfiguringDifferentProfile = viewModel.uiState.showAlertForConfiguringDifferentProfile,
         errorDataShown = viewModel::errorDataShown,
@@ -183,6 +183,7 @@ fun SelectProfileContent(
     profileExpiryTimestampMs: Long?,
     providerInfo: ProviderInfo?,
     inProgress: Boolean,
+    showConnectButton: Boolean,
     errorData: ErrorData?,
     showAlertForConfiguringDifferentProfile: PresentProfile?,
     errorDataShown: () -> Unit = {},
@@ -406,13 +407,17 @@ fun SelectProfileContent(
                     )
                 }
             }
-        } else {
+        } else if (showConnectButton) {
             PrimaryButton(
                 text = stringResource(R.string.button_connect),
                 enabled = !inProgress,
                 onClick = { connectWithSelectedProfile() },
                 modifier = Modifier
                     .navigationBarsPadding()
+            )
+        } else {
+            Spacer(
+                modifier = Modifier.navigationBarsPadding()
             )
         }
     }
@@ -503,6 +508,7 @@ private fun Preview_SelectProfileModal() {
             profileExpiryTimestampMs = LocalDateTime.now().plusDays(3).toEpochSecond(ZoneOffset.UTC) * 1000,
             providerInfo = null,
             inProgress = false,
+            showConnectButton = true,
             errorData = null,
             showAlertForConfiguringDifferentProfile = null
         )
