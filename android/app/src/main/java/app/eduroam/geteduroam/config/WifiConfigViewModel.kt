@@ -77,9 +77,9 @@ class WifiConfigViewModel @Inject constructor(
         }
         passphraseDialogRetryCount.value = 0
 
-        val intentsNotAllowed = Build.BRAND.startsWith("oneplus", ignoreCase = true) && Build.VERSION.SDK_INT == Build.VERSION_CODES.R // OnePlus devices running Android 11 (https://github.com/geteduroam/mobile-app/issues/113)
-                // Feel free to add more cases here if needed
-
+        val intentsNotAllowed = Build.VERSION.SDK_INT == Build.VERSION_CODES.R // From our experience, a lot of Android devices have either
+        // a buggy version of this implementation, or the system launcher itself (which is written by the device manufacturer) did not write
+        // the implementation correctly (crashing Settings screens), so for now we still use the old version.
         when {
             //Android 11 and higher - API 30 - ChromeOS - we show everything in one intent
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && context.isChromeOs() -> {
