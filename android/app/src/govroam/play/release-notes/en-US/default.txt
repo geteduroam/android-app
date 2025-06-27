@@ -1,3 +1,4 @@
-Release notes for version 2.1.7 (2674)
+Release notes for version 2.1.7 (2675)
 ================================
-0a1aef1 Merge pull request #145 from geteduroam/feature/issue_140
+52a9536 Merge pull request #149 from geteduroam/feature/issue-146
+93c4642 Merge pull request #43 from DimitriPapadopoulos/codesepell
