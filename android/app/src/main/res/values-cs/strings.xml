@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="profiles_reconfigure_device_to_renew">Znovu nastavit vaše zařízení pro obnovení přístupu k síti, pokud máte problémy se sítí.</string>
+    <string name="err_msg_auth_no_matching_auth_request">Nenalezen žádný autorizační požadavek pro přesměrování URI</string>
+    <string name="err_msg_auth_code_failed_arg">Výměna autorizačního kódu selhala: %s.</string>
+    <string name="err_msg_not_a_valid_eap_config_file">Neplatný soubor .eap-config</string>
+    <string name="username_password_please_enter">Zadejte své uživatelské jméno a heslo.</string>
+    <string name="passphrase_dialog_button_enter">Zadat</string>
+    <string name="configuration_android_10_notification_disclaimer">Android 10 vyžaduje, abyste přijali nové Wi-Fi sítě pomocí tichého oznámení. Pro připojení k novým sítím se podívejte do svých oznámení.</string>
+    <string name="err_msg_missing_eap_endpoint">Ve zvoleném profilu chybí endpoint EAP.</string>
+    <string name="profile_status_account_valid_in_future"><![CDATA[Máte přístup do %1$s <b>(za %2$s)</b>]]></string>
+    <string name="button_close_app">Zavřít aplikaci</string>
+    <string name="notification_channel_description">Připomene vám, že vaše konfigurace brzy vyprší</string>
+    <string name="organization_search_text">Vyhledejte svou organizaci</string>
+    <string name="open_eap_config_file">Otevřít soubor .eap-config</string>
+    <string name="connect_to_server">Připojit se k %s</string>
+    <string name="profiles_do_you_want_to_reconfigure_device">Chcete znovu nastavit své zařízení, aby raději používalo profil %s?</string>
+    <string name="profiles_connected_with_profile">Již připojeno</string>
+    <string name="profiles_reconfigure_profile">Znovu nastavit zařízení</string>
+    <string name="profiles_reconfigure_cancel">Zrušit</string>
+    <string name="profiles_title">Profily</string>
+    <string name="profiles_header">Vyberte profil</string>
+    <string name="profiles_profile_configured">Nastaveno</string>
+    <string name="configuration_progress">Navazování Wi-Fi spojení</string>
+    <string name="configuration_waiting_for_user_credentials">Čekání na uživatelské údaje…</string>
+    <string name="configuration_success">Wi-Fi nastavena</string>
+    <string name="configuration_logs">Zprávy v protokolu:</string>
+    <string name="configuration_canceled">Zrušeno</string>
+    <string name="configuration_completed">Dokončeno</string>
+    <string name="login_dialog_title">Vyžadováno přihlášení</string>
+    <string name="login_dialog_text">Zadejte své uživatelské jméno a heslo</string>
+    <string name="login_dialog_username">Uživatelské jméno</string>
+    <string name="login_dialog_password">Heslo</string>
+    <string name="login_dialog_cancel">Zrušit</string>
+    <string name="login_dialog_login">Přihlásit se</string>
+    <string name="terms_of_use_dialog_title">Podmínky použití</string>
+    <string name="terms_of_use_dialog_agree">Souhlasím</string>
+    <string name="terms_of_use_dialog_disagree">Nesouhlasím</string>
+    <string name="terms_of_use_dialog_text">Před použitím této sítě musíte odsouhlasit podmínky použití</string>
+    <string name="err_title_auth_unexpected_fail">Neočekávaná chyba</string>
+    <string name="err_msg_auth_init_fail">Nepodařilo se inicializovat AppData. Zkuste to znovu.</string>
+    <string name="err_msg_auth_init_fail_arg">Nepodařilo se inicializovat AppData. Důvod: %s</string>
+    <string name="err_title_auth_invalid">Autorizace je neplatná</string>
+    <string name="err_msg_auth_invalid">Nebyla obdržena platná autentifikace.</string>
+    <string name="err_title_auth_failed">Autorizace selhala</string>
+    <string name="err_msg_auth_failed">Stav autorizace nebyl zachován – je vyžadována nová autorizace.</string>
+    <string name="err_msg_auth_token_failed">Výměna autorizačního tokenu selhala.</string>
+    <string name="err_title_generic_fail">Nelze dokončit požadavek</string>
+    <string name="err_msg_generic_unexpected_with_arg">Neočekávaná chyba: %s, zkuste to prosím znovu.</string>
+    <string name="err_msg_invalid_organization_id">Neplatné ID organizace. Nelze pokračovat u vybrané organizace.</string>
+    <string name="err_msg_cannot_find_organization">Nepodařilo se najít organizaci s ID %s.</string>
+    <string name="err_msg_could_not_discover_profile_configuration">Nelze načíst konfiguraci profilu. Zkontrolujte své připojení a zkuste to znovu.</string>
+    <string name="err_msg_no_valid_provider">Nebyl nalezen platný poskytovatel EAP.</string>
+    <string name="err_msg_auth_no_saved_configuration">Uložená konfigurace nenalezena</string>
+    <string name="welcome">Vítejte</string>
+    <string name="organizations_no_results">Nepodařilo se najít žádné organizace.</string>
+    <string name="institutions_choose_one">Vyberte instituci, ke které se chcete připojit.</string>
+    <string name="oauth_title" tools:ignore="ExtraTranslation">Autentifikace</string>
+    <string name="oauth_description" tools:ignore="ExtraTranslation">Pro získání konfigurace Wi-Fi se autentifikujte svým účtem.</string>
+    <string name="oauth_processing" tools:ignore="ExtraTranslation">Zpracovávání…</string>
+    <string name="button_ok">OK</string>
+    <string name="button_retry">Zkusit znovu</string>
+    <string name="button_connect">PŘIPOJIT SE</string>
+    <string name="button_back">Zpět</string>
+    <string name="content_description_provider_logo">Logo poskytovatele</string>
+    <string name="content_description_success_checkmark">Značka úspěchu</string>
+    <string name="helpdesk_title">Nápověda</string>
+    <string name="username_password_login_required">Vyžadováno přihlášení</string>
+    <string name="username_password_label_username">Uživatelské jméno</string>
+    <string name="username_password_label_password">Heslo</string>
+    <string name="username_password_button_cancel">Zrušit</string>
+    <string name="username_password_button_log_in">Přihlásit se</string>
+    <string name="username_password_error_required_suffix">Uživatelské jméno by mělo končit textem: %s</string>
+    <string name="username_password_placeholder_username_example_suffix">example.com</string>
+    <string name="username_password_placeholder_username_before_suffix">uživatelské jméno</string>
+    <string name="username_password_accessibility_hide_password">Skrýt heslo</string>
+    <string name="username_password_accessibility_show_password">Zobrazit heslo</string>
+    <string name="notification_channel_name">Připomínka opětovné konfigurace</string>
+    <string name="notification_title">Znovu nastavit %s</string>
+    <string name="notification_message">Do vypršení vašeho profilu %2$s zbývá %1$d dní, klikněte pro jeho opětovnou konfiguraci</string>
+    <string name="passphrase_dialog_title">Zadejte heslovou frázi</string>
+    <string name="passphrase_dialog_message">Tento profil vyžaduje heslovou frázi</string>
+    <string name="passphrase_dialog_label_passphrase">Heslová fráze</string>
+    <string name="passphrase_dialog_button_cancel">Zrušit</string>
+    <string name="passphrase_dialog_incorrect_passphrase">Zadaná heslová fráze je nesprávná!</string>
+    <string name="passphrase_accessibility_hide_passphrase">Skrýt heslovou frázi</string>
+    <string name="passphrase_accessibility_show_passphrase">Zobrazit heslovou frázi</string>
+    <string name="profile_status_account_valid_in_past"><![CDATA[Měli jste přístup do %1$s <b>(před %2$s)</b>]]></string>
+    <string name="configuration_source_custom_host">Vlastní hostitel</string>
+    <plurals name="time_years">
+        <item quantity="one">rok</item>
+        <item quantity="few">roky</item>
+        <item quantity="other">let</item>
+    </plurals>
+    <plurals name="time_months">
+        <item quantity="one">měsíc</item>
+        <item quantity="few">měsíce</item>
+        <item quantity="other">měsíců</item>
+    </plurals>
+    <plurals name="time_days">
+        <item quantity="one">den</item>
+        <item quantity="few">dny</item>
+        <item quantity="other">dnů</item>
+    </plurals>
+    <plurals name="time_hours">
+        <item quantity="one">hodina</item>
+        <item quantity="few">hodiny</item>
+        <item quantity="other">hodin</item>
+    </plurals>
+    <plurals name="time_minutes">
+        <item quantity="one">minuta</item>
+        <item quantity="few">minuty</item>
+        <item quantity="other">minut</item>
+    </plurals>
+    <plurals name="time_seconds">
+        <item quantity="one">sekunda</item>
+        <item quantity="few">sekundy</item>
+        <item quantity="other">sekund</item>
+    </plurals>
+    <string name="profiles_already_configured_for_profile">Pro profil %s již bylo nastaveno</string>
+</resources>

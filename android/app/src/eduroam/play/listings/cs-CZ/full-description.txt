@@ -1,0 +1,3 @@
+Nakonfigurujte Wi-Fi síť eduroam podle profilů vytvořených pro instituce a samotnými institucemi.
+
+Po výběru správného profilu (eduroam CAT) a zadání uživatelských údajů by měla být síť eduroam nakonfigurována a připravena k použití.
