@@ -151,6 +151,7 @@ fun SelectProfileScreen(
         institution = viewModel.uiState.organization,
         configuredOrganization = viewModel.uiState.configuredOrganization,
         providerInfo = viewModel.uiState.providerInfo,
+        providerLogoBitmap = viewModel.providerLogoBitmap,
         inProgress = viewModel.uiState.inProgress,
         errorData = viewModel.uiState.errorData,
         showAlertForConfiguringDifferentProfile = viewModel.uiState.showAlertForConfiguringDifferentProfile,
@@ -182,6 +183,7 @@ fun SelectProfileContent(
     configuredOrganization: ConfiguredOrganization?,
     profileExpiryTimestampMs: Long?,
     providerInfo: ProviderInfo?,
+    providerLogoBitmap: android.graphics.Bitmap?,
     inProgress: Boolean,
     errorData: ErrorData?,
     showAlertForConfiguringDifferentProfile: PresentProfile?,
@@ -280,7 +282,7 @@ fun SelectProfileContent(
                             .padding(vertical = 16.dp),
                         verticalAlignment = Alignment.Top
                     ) {
-                        providerInfo.providerLogo?.convertToBitmap()?.let { logoBitmap ->
+                        providerLogoBitmap?.let { logoBitmap ->
                             Surface(
                                 modifier = Modifier.size(104.dp),
                                 color = Color.White,
@@ -502,6 +504,7 @@ private fun Preview_SelectProfileModal() {
             configuredOrganization = null,
             profileExpiryTimestampMs = LocalDateTime.now().plusDays(3).toEpochSecond(ZoneOffset.UTC) * 1000,
             providerInfo = null,
+            providerLogoBitmap = null,
             inProgress = false,
             errorData = null,
             showAlertForConfiguringDifferentProfile = null
