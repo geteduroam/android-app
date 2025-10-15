@@ -351,7 +351,6 @@ class SelectProfileViewModel @Inject constructor(
             val logoBitmap = info?.providerLogo?.convertToBitmap()
             
             providerLogoBitmap = logoBitmap
-            Timber.d("[TransactionSize] Stored logo in separate property (NOT in SavedState)")
             
             uiState = uiState.copy(
                 inProgress = true,
@@ -371,7 +370,6 @@ class SelectProfileViewModel @Inject constructor(
             } else {
                 val providersWithoutLogos = providers.stripLogos()
                 uiState = uiState.copy(inProgress = false, goToConfigScreenWithProviderList = providersWithoutLogos)
-                Timber.d("[TransactionSize] Stored EAPIdentityProviderList WITHOUT logos in goToConfigScreenWithProviderList")
             }
         } else {
             displayEapError()

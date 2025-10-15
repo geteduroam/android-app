@@ -105,7 +105,6 @@ object NavTypes {
             } else {
                 val decodedString = Uri.decode(string)
                 val result = Json.decodeFromString<EAPIdentityProviderList>(decodedString)
-                Timber.d("[TransactionSize] EAPIdentityProviderListNavType.get() decoded ${decodedString.length} characters from Bundle")
                 result
             }
         }
@@ -118,20 +117,12 @@ object NavTypes {
         override fun serializeAsValue(value: EAPIdentityProviderList): String {
             val string = Json.encodeToString(value)
             val encoded = Uri.encode(string)
-            Timber.d("[TransactionSize] EAPIdentityProviderListNavType.serializeAsValue() created ${string.length} character JSON (~${string.length / 1024}KB)")
-            Timber.d("[TransactionSize] After URI encoding: ${encoded.length} characters")
             return encoded
         }
 
         override fun put(bundle: Bundle, key: String, value: EAPIdentityProviderList) {
             val string = Json.encodeToString(value)
             val encodedString = Uri.encode(string)
-            Timber.d("[TransactionSize] EAPIdentityProviderListNavType.put() storing ${string.length} character JSON in Bundle")
-            Timber.d("[TransactionSize] After URI encoding: ${encodedString.length} characters (~${encodedString.length / 1024}KB)")
-            
-            val logoSize = value.eapIdentityProvider?.firstOrNull()?.providerInfo?.providerLogo?.value?.length ?: 0
-            Timber.d("[TransactionSize] Logo size in EAPIdentityProviderList being stored: $logoSize characters")
-            
             bundle.putString(key, encodedString)
         }
     }

@@ -63,9 +63,6 @@ class WifiConfigViewModel @Inject constructor(
         configuredProfileId = data.configuredProfileId
         configuredOrganization = data.configuredOrganization
         
-        val logoSize = eapIdentityProviderList.eapIdentityProvider?.firstOrNull()?.providerInfo?.providerLogo?.value?.length ?: 0
-        Timber.d("[TransactionSize] WifiConfigViewModel received EAPIdentityProviderList with logo size: $logoSize characters (~${logoSize / 1024}KB)")
-        
         try {
             val json = Json.encodeToString(eapIdentityProviderList)
             Timber.d("[TransactionSize] WifiConfigViewModel EAPIdentityProviderList JSON size: ${json.length} characters (~${json.length / 1024}KB)")
