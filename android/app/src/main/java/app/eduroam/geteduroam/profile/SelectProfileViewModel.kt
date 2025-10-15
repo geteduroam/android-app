@@ -346,11 +346,7 @@ class SelectProfileViewModel @Inject constructor(
                 Timber.w(e, "[TransactionSize] Could not serialize EAPIdentityProviderList for size check")
             }
             
-            val providerId = firstProvider.ID ?: "unknown"
-            val logoBase64 = info?.providerLogo?.value
-            val logoBitmap = info?.providerLogo?.convertToBitmap()
-            
-            providerLogoBitmap = logoBitmap
+            providerLogoBitmap = info?.providerLogo?.convertToBitmap()
             
             uiState = uiState.copy(
                 inProgress = true,
