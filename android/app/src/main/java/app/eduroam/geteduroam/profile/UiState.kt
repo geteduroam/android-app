@@ -30,7 +30,6 @@ data class PresentOrganization(
     val location: String? = null,
     val displayName: String? = null,
     val description: String? = null,
-    val logo: String? = null,
     val termsOfUse: String? = null,
     val helpDesk: Helpdesk? = null
 )

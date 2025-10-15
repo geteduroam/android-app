@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,13 +12,14 @@ import androidx.navigation.toRoute
 import app.eduroam.geteduroam.NavTypes
 import app.eduroam.geteduroam.R
 import app.eduroam.geteduroam.Route
+import android.graphics.Bitmap
 import app.eduroam.geteduroam.config.AndroidConfigParser
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.config.model.localizedMatch
+import app.eduroam.geteduroam.extensions.stripLogos
 import app.eduroam.geteduroam.di.api.GetEduroamApi
 import app.eduroam.geteduroam.di.repository.StorageRepository
 import app.eduroam.geteduroam.models.DiscoveryResult
-import app.eduroam.geteduroam.models.Organization
 import app.eduroam.geteduroam.models.Profile
 import app.eduroam.geteduroam.ui.ErrorData
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +28,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -45,6 +47,9 @@ class SelectProfileViewModel @Inject constructor(
     private val parser = AndroidConfigParser()
 
     var uiState by mutableStateOf(UiState())
+        private set
+    
+    var providerLogoBitmap: Bitmap? by mutableStateOf(null)
         private set
     val institutionId: String?
 
@@ -330,6 +335,19 @@ class SelectProfileViewModel @Inject constructor(
         if (firstProvider != null) {
             val knownInstitution = uiState.organization
             val info = firstProvider.providerInfo
+            
+            val logoSize = info?.providerLogo?.value?.length ?: 0
+            Timber.d("[TransactionSize] ProviderLogo Base64 size: $logoSize characters (~${logoSize / 1024}KB)")
+            
+            try {
+                val providersJson = Json.encodeToString(providers)
+                Timber.d("[TransactionSize] Full EAPIdentityProviderList JSON size: ${providersJson.length} characters (~${providersJson.length / 1024}KB)")
+            } catch (e: Exception) {
+                Timber.w(e, "[TransactionSize] Could not serialize EAPIdentityProviderList for size check")
+            }
+            
+            providerLogoBitmap = info?.providerLogo?.convertToBitmap()
+            
             uiState = uiState.copy(
                 inProgress = true,
                 organization = PresentOrganization(
@@ -337,16 +355,17 @@ class SelectProfileViewModel @Inject constructor(
                     location = knownInstitution?.location,
                     displayName = info?.displayNames?.localizedMatch(),
                     description = info?.descriptions?.localizedMatch(),
-                    logo = info?.providerLogo?.value,
                     termsOfUse = info?.termsOfUse?.localizedMatch(),
                     helpDesk = info?.helpdesk
                 ),
                 providerInfo = info
             )
+            
             if (info?.termsOfUse != null && !didAgreeToTerms) {
                 uiState = uiState.copy(inProgress = false, showTermsOfUseDialog = true)
             } else {
-                uiState = uiState.copy(inProgress = false, goToConfigScreenWithProviderList = providers)
+                val providersWithoutLogos = providers.stripLogos()
+                uiState = uiState.copy(inProgress = false, goToConfigScreenWithProviderList = providersWithoutLogos)
             }
         } else {
             displayEapError()
@@ -375,9 +394,6 @@ class SelectProfileViewModel @Inject constructor(
         uiState = uiState.copy(errorData = null, showAlertForConfiguringDifferentProfile = null)
     }
 
-    /**
-     * Call this when you start the OAuth flow, to avoid recalling it each time the screen is composed, and also to trigger the next check
-     */
     fun setOAuthFlowStarted() {
         uiState = uiState.copy(promptForOAuth = false, checkProfileWhenResuming = true)
     }

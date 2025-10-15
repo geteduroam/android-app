@@ -104,7 +104,8 @@ object NavTypes {
                 null
             } else {
                 val decodedString = Uri.decode(string)
-                Json.decodeFromString(decodedString)
+                val result = Json.decodeFromString<EAPIdentityProviderList>(decodedString)
+                result
             }
         }
 
@@ -115,8 +116,8 @@ object NavTypes {
 
         override fun serializeAsValue(value: EAPIdentityProviderList): String {
             val string = Json.encodeToString(value)
-            return Uri.encode(string)
-
+            val encoded = Uri.encode(string)
+            return encoded
         }
 
         override fun put(bundle: Bundle, key: String, value: EAPIdentityProviderList) {
@@ -154,7 +155,6 @@ sealed class Route {
     ): Route() {
         companion object {
             suspend fun buildDeepLink(context: Context, fileUri: Uri): ConfigureWifi? = withContext(Dispatchers.IO) {
-                // Read the contents of the file as XML
                 val inputStream = context.contentResolver.openInputStream(fileUri) ?: return@withContext null
                 val bytes = inputStream.readBytes()
                 val configParser = AndroidConfigParser()
