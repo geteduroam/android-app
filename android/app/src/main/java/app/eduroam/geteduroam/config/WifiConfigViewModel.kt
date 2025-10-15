@@ -28,8 +28,6 @@ import app.eduroam.geteduroam.ui.theme.isChromeOs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import timber.log.Timber
 import java.lang.UnsupportedOperationException
 import javax.inject.Inject
@@ -43,7 +41,7 @@ class WifiConfigViewModel @Inject constructor(
 
     val eapIdentityProviderList: EAPIdentityProviderList
     val configuredOrganization: ConfiguredOrganization
-    val configuredProfileId: String?
+    val configuredProfileId: String? // Can be null if configured from file
 
     val launch: MutableStateFlow<Unit?> = MutableStateFlow(null)
     val progressMessage = MutableStateFlow("")
@@ -62,13 +60,6 @@ class WifiConfigViewModel @Inject constructor(
         eapIdentityProviderList = data.eapIdentityProviderList
         configuredProfileId = data.configuredProfileId
         configuredOrganization = data.configuredOrganization
-        
-        try {
-            val json = Json.encodeToString(eapIdentityProviderList)
-            Timber.d("[TransactionSize] WifiConfigViewModel EAPIdentityProviderList JSON size: ${json.length} characters (~${json.length / 1024}KB)")
-        } catch (e: Exception) {
-            Timber.w(e, "[TransactionSize] Could not serialize EAPIdentityProviderList in WifiConfigViewModel")
-        }
     }
 
     fun launchConfiguration(context: Context, fallbackToSuggestions: Boolean = false) = viewModelScope.launch {
