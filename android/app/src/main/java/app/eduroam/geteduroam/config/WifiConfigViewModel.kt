@@ -131,13 +131,10 @@ class WifiConfigViewModel @Inject constructor(
         val wifiManager: WifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         if (ssids.isNotEmpty() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val suggestions: MutableList<WifiNetworkSuggestion> = wifiManager.networkSuggestions
-            for (suggestion in suggestions) {
-                for (ssid in ssids) {
-                    if (ssid == suggestion.ssid) break
-                }
-                suggestions.remove(suggestion)
+            val suggestionsToRemove = suggestions.filterNot { suggestion ->
+                ssids.contains(suggestion.ssid)
             }
-            wifiManager.removeNetworkSuggestions(suggestions)
+            wifiManager.removeNetworkSuggestions(suggestionsToRemove)
         } else {
             removeNetworks(context)
         }
