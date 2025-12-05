@@ -1,3 +1,4 @@
-Release notes for version 2.1.7 (2677)
+Release notes for version 2.1.7 (2678)
 ================================
+a1efb89 Merge pull request #153 from geteduroam/bugfix/ConcurrentModificationException
 34c82c7 Merge pull request #152 from geteduroam/bugfix/ConversionException
