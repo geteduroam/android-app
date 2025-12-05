@@ -8,7 +8,7 @@
     <string name="profiles_title">Profielen</string>
     <string name="profiles_header">Kies een profiel</string>
     <string name="profiles_already_configured_for_profile">Reeds ingesteld voor %s-profiel</string>
-    <string name="profiles_do_you_want_to_reconfigure_device">Wil je jouw toestel instellen om het %@-profiel te gebruiken?</string>
+    <string name="profiles_do_you_want_to_reconfigure_device">Wil je jouw toestel instellen om het %s-profiel te gebruiken?</string>
     <string name="profiles_connected_with_profile">Reeds verbonden</string>
     <string name="profiles_reconfigure_device_to_renew">Stel jouw toestel opnieuw in om netwerktoegang te vernieuwen of als je problemen ervaart met het netwerk.</string>
     <string name="profiles_reconfigure_profile">Stel toestel opnieuw in</string>
