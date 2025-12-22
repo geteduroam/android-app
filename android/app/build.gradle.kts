@@ -159,6 +159,7 @@ dependencies {
     implementation(libs.google.protobuf)
     implementation(libs.accompanist.permissions)
     implementation(libs.accompanist.bottomsheet)
+    implementation(libs.androidx.work.runtime)
     implementation(libs.appauth)
     implementation(libs.simpleframework.xml.parser)
 

@@ -17,6 +17,7 @@ firebase-crashlytics-gradle = "2.9.9"
 protobuf-plugin = "0.9.3"
 play-publisher-plugin = "3.8.6"
 compose-navigation = "2.8.4"
+workmanager = "2.10.0"
 
 hilt-android = "2.52"
 hilt-navigation-compose = "1.2.0"
@@ -81,6 +82,8 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics"}
 
 kotlin-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin-serialization" }
+
+androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "workmanager" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }

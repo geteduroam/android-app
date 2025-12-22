@@ -75,10 +75,6 @@
             android:launchMode="singleTask"
             android:theme="@style/Theme.AppCompat.Translucent.NoTitleBar"/>
 
-        <receiver
-            android:name=".di.repository.NotificationAlarmReceiver"
-            android:exported="false" />
-
     </application>
 
 </manifest>
