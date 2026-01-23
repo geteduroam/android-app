@@ -45,11 +45,11 @@ class NotificationRepository(
     }
 
     private fun getReminderDate(provider: EAPIdentityProvider): Date? {
-       // if (provider.requiresUsernamePrompt()) {
+        if (provider.requiresUsernamePrompt()) {
             // Only OAuth users require notification reminders
-      //      return null
-      //  }
-        val validUntil = provider.validUntil ?: return Date((Date().time + 30 * 1000))
+            return null
+        }
+        val validUntil = provider.validUntil ?: return null
         val now = Date()
         val expiryReminderAtMs = validUntil.time - REMIND_DAYS_BEFORE_EXPIRY * 24 * 60 * 60 * 1000
         if (expiryReminderAtMs > now.time) {
