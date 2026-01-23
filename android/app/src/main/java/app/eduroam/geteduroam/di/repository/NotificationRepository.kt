@@ -1,30 +1,23 @@
 package app.eduroam.geteduroam.di.repository
 
 import android.Manifest
-import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.PendingIntent.getActivity
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Context.ALARM_SERVICE
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Bundle
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import app.eduroam.geteduroam.MainActivity
+import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.WorkManager
 import app.eduroam.geteduroam.R
-import app.eduroam.geteduroam.Route
 import app.eduroam.geteduroam.config.model.EAPIdentityProvider
 import app.eduroam.geteduroam.config.requiresUsernamePrompt
 import dagger.hilt.android.qualifiers.ApplicationContext
 import timber.log.Timber
 import java.util.Date
+import java.util.concurrent.TimeUnit
 
 
 class NotificationRepository(
@@ -37,6 +30,7 @@ class NotificationRepository(
         const val REMIND_DAYS_BEFORE_EXPIRY = 5
         const val NOTIFICATION_ID = 100
         const val KEY_EXTRA_PAYLOAD = "extra_payload"
+        const val WORK_TAG = "notification_reminder"
     }
 
     fun shouldRequestPushPermission(provider: EAPIdentityProvider, organizationId: String): Boolean {
@@ -75,11 +69,29 @@ class NotificationRepository(
     }
 
     private fun postNotificationAtDate(reminderDate: Date, organizationId: String) {
-        val intent = Intent(context, NotificationAlarmReceiver::class.java)
-        intent.putExtra(NOTIFICATION_KEY_PROVIDER_ID, organizationId)
-        val pendingIntent = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val alarmManager = context.applicationContext.getSystemService(ALARM_SERVICE) as AlarmManager
-        alarmManager.set(AlarmManager.RTC_WAKEUP, reminderDate.time, pendingIntent)
+        val delayMillis = reminderDate.time - System.currentTimeMillis()
+        if (delayMillis <= 0) {
+            Timber.w("Reminder date is in the past, not scheduling notification")
+            return
+        }
+
+        val inputData = Data.Builder()
+            .putString(NOTIFICATION_KEY_PROVIDER_ID, organizationId)
+            .build()
+
+        val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+            .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setInputData(inputData)
+            .addTag(WORK_TAG)
+            .build()
+
+        // Use unique work to replace any previously scheduled notification
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            WORK_TAG,
+            ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
     }
 
     private fun createNotificationChannel() {
@@ -90,35 +102,5 @@ class NotificationRepository(
         channel.description = description
         val notificationManager: NotificationManager = context.getSystemService(NotificationManager::class.java)
         notificationManager.createNotificationChannel(channel)
-    }
-}
-
-class NotificationAlarmReceiver : BroadcastReceiver() {
-
-    override fun onReceive(context: Context?, intent: Intent?) {
-        if (context == null) {
-            return
-        }
-        val tapResultIntent = Intent(context, MainActivity::class.java)
-        intent?.getStringExtra(NotificationRepository.NOTIFICATION_KEY_PROVIDER_ID)?.let {
-            tapResultIntent.putExtra(NotificationRepository.KEY_EXTRA_PAYLOAD, Route.SelectProfile(institutionId = it, customHostUri = null))
-        }
-        tapResultIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        val pendingIntent: PendingIntent = getActivity( context, 0, tapResultIntent,PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-
-        val notification = NotificationCompat.Builder(context, NotificationRepository.NOTIFICATION_CHANNEL_ID)
-                .setContentTitle(context.getString(R.string.notification_title, context.getString(R.string.name)))
-                .setContentText(context.getString(R.string.notification_message, NotificationRepository.REMIND_DAYS_BEFORE_EXPIRY, context.getString(R.string.name)))
-                .setSmallIcon(R.drawable.ic_notification)
-                .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setContentIntent(pendingIntent)
-                .build()
-        val notificationManager = NotificationManagerCompat.from(context)
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-            notificationManager.notify(NotificationRepository.NOTIFICATION_ID, notification)
-        } else {
-            Timber.w("Could not post notification because there was no permission!")
-        }
     }
 }
