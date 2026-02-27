@@ -88,6 +88,7 @@ class NotificationRepository(
      */
     fun shouldRequestHibernationExemption(provider: EAPIdentityProvider, organizationId: String): Boolean {
         if (getReminderDate(provider) == null || organizationId.isEmpty()) {
+            Timber.tag("Hibernate").i( "No expiration date or organization ID known, dont check hibernation")
             return false
         }
         return try {
@@ -102,10 +103,10 @@ class NotificationRepository(
                 else -> false
             }
         } catch (e: ExecutionException) {
-            Timber.w(e, "Failed to check unused app restrictions status")
+            Timber.tag("Hibernate").w(e, "Failed to check unused app restrictions status")
             false
         } catch (e: InterruptedException) {
-            Timber.w(e, "Interrupted while checking unused app restrictions status")
+            Timber.tag("Hibernate").w(e, "Interrupted while checking unused app restrictions status")
             false
         }
     }

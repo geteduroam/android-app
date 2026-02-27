@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -64,8 +65,10 @@ import app.eduroam.geteduroam.models.ConfigSource
 import app.eduroam.geteduroam.organizations.ConfiguredOrganization
 import app.eduroam.geteduroam.ui.AlertDialogWithSingleButton
 import app.eduroam.geteduroam.ui.ErrorData
+import app.eduroam.geteduroam.ui.HibernationExemptionDialog
 import app.eduroam.geteduroam.ui.LinkifyText
 import app.eduroam.geteduroam.ui.PrimaryButton
+import app.eduroam.geteduroam.ui.launchManageUnusedAppRestrictionsIntent
 import app.eduroam.geteduroam.ui.theme.AppTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -89,6 +92,7 @@ fun SelectProfileScreen(
 ) { paddingValues ->
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
     val currentGotoOauth by rememberUpdatedState(newValue = goToOAuth)
 
     LaunchedEffect(viewModel, lifecycle) {
@@ -170,6 +174,20 @@ fun SelectProfileScreen(
                 viewModel.didAgreeToTerms(true)
             }, onDismiss = {
                 viewModel.didAgreeToTerms(false)
+            }
+        )
+    }
+
+    if (viewModel.uiState.showHibernationExemptionDialog) {
+        HibernationExemptionDialog(
+            onConfirm = {
+                viewModel.dismissHibernationExemptionDialog()
+                launchManageUnusedAppRestrictionsIntent(context)
+                viewModel.scheduleReminderNotification()
+            },
+            onDismiss = {
+                viewModel.dismissHibernationExemptionDialog()
+                viewModel.scheduleReminderNotification()
             }
         )
     }

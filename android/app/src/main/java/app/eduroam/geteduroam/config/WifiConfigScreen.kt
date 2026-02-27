@@ -19,14 +19,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -39,16 +37,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.core.content.PackageManagerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.eduroam.geteduroam.EduTopAppBar
 import app.eduroam.geteduroam.R
-import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
-import app.eduroam.geteduroam.di.repository.NotificationRepository
+import app.eduroam.geteduroam.ui.HibernationExemptionDialog
+import app.eduroam.geteduroam.ui.launchManageUnusedAppRestrictionsIntent
 import app.eduroam.geteduroam.organizations.PassphraseDialog
 import app.eduroam.geteduroam.organizations.UsernamePasswordDialog
 import app.eduroam.geteduroam.ui.PrimaryButton
@@ -195,8 +190,7 @@ fun WifiConfigScreen(
         HibernationExemptionDialog(
             onConfirm = {
                 showHibernationDialog = false
-                val intent = PackageManagerCompat.createManageUnusedAppRestrictionsIntent(context)
-                context.startActivity(intent)
+                launchManageUnusedAppRestrictionsIntent(context)
                 viewModel.scheduleReminderNotification()
             },
             onDismiss = {
@@ -321,17 +315,6 @@ private fun getTextToShowGivenPermissions(
     return textToShow.toString()
 }
 
-@PreviewLightDark
-@Composable
-private fun HibernationExemptionDialog_Preview() {
-    AppTheme {
-        HibernationExemptionDialog(
-            onConfirm = {},
-            onDismiss = {}
-        )
-    }
-}
-
 @Preview
 @Composable
 private fun WifiConfigScreen_Preview() {
@@ -342,42 +325,4 @@ private fun WifiConfigScreen_Preview() {
             goBack = {}
         )
     }
-}
-
-@Composable
-private fun HibernationExemptionDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = stringResource(R.string.hibernation_exemption_dialog_title),
-                style = MaterialTheme.typography.titleLarge,
-            )
-        },
-        text = {
-            Text(
-                text = stringResource(R.string.hibernation_exemption_dialog_message, stringResource(R.string.name)),
-                style = MaterialTheme.typography.bodyLarge,
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(
-                    text = stringResource(R.string.hibernation_exemption_dialog_confirm),
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(
-                    text = stringResource(R.string.hibernation_exemption_dialog_dismiss),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
-        }
-    )
 }
