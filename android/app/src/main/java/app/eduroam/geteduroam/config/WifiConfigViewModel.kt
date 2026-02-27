@@ -330,6 +330,13 @@ class WifiConfigViewModel @Inject constructor(
         return false
     }
 
+    fun shouldRequestHibernationExemption(): Boolean {
+        eapIdentityProviderList.eapIdentityProvider?.firstOrNull()?.let {
+            return notificationRepository.shouldRequestHibernationExemption(it, configuredOrganization.id)
+        }
+        return false
+    }
+
     fun scheduleReminderNotification() {
         eapIdentityProviderList.eapIdentityProvider?.firstOrNull()?.let {
             notificationRepository.scheduleNotificationIfNeeded(it, configuredOrganization.id)

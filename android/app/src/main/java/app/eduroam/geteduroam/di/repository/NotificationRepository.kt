@@ -6,6 +6,8 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
+import androidx.core.content.PackageManagerCompat
+import androidx.core.content.UnusedAppRestrictionsConstants
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -14,9 +16,11 @@ import androidx.work.WorkManager
 import app.eduroam.geteduroam.R
 import app.eduroam.geteduroam.config.model.EAPIdentityProvider
 import app.eduroam.geteduroam.config.requiresUsernamePrompt
+import com.google.common.util.concurrent.ListenableFuture
 import dagger.hilt.android.qualifiers.ApplicationContext
 import timber.log.Timber
 import java.util.Date
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 
 
@@ -66,6 +70,45 @@ class NotificationRepository(
         createNotificationChannel()
         Timber.i("Posting reminder to date: $reminderDate")
         postNotificationAtDate(reminderDate, organizationId)
+    }
+
+    /**
+     * Returns true if the user should be asked to disable app hibernation restrictions.
+     *
+     * App hibernation force-stops the app after months of inactivity, cancelling all scheduled
+     * WorkManager jobs and preventing notifications from being delivered. Because this app is
+     * typically only opened once for initial setup and then again at certificate renewal time,
+     * it is a prime candidate for hibernation — which is exactly when the reminder notification
+     * must still fire.
+     *
+     * Returns false when:
+     * - There is no reminder to schedule (no valid expiry date, or the profile doesn't need reminders)
+     * - The feature is not available on this device (e.g. Android < 6, or no Play Services on F-Droid builds)
+     * - The app is already exempt
+     */
+    fun shouldRequestHibernationExemption(provider: EAPIdentityProvider, organizationId: String): Boolean {
+        if (getReminderDate(provider) == null || organizationId.isEmpty()) {
+            Timber.tag("Hibernate").i( "No expiration date or organization ID known, dont check hibernation")
+            return false
+        }
+        return try {
+            val future: ListenableFuture<Int> =
+                PackageManagerCompat.getUnusedAppRestrictionsStatus(context)
+            when (future.get()) {
+                UnusedAppRestrictionsConstants.FEATURE_NOT_AVAILABLE -> false
+                UnusedAppRestrictionsConstants.DISABLED -> false
+                UnusedAppRestrictionsConstants.API_30_BACKPORT,
+                UnusedAppRestrictionsConstants.API_30,
+                UnusedAppRestrictionsConstants.API_31 -> true
+                else -> false
+            }
+        } catch (e: ExecutionException) {
+            Timber.tag("Hibernate").w(e, "Failed to check unused app restrictions status")
+            false
+        } catch (e: InterruptedException) {
+            Timber.tag("Hibernate").w(e, "Interrupted while checking unused app restrictions status")
+            false
+        }
     }
 
     private fun postNotificationAtDate(reminderDate: Date, organizationId: String) {

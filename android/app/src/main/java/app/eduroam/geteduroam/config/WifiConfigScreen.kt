@@ -29,7 +29,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -39,8 +42,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.eduroam.geteduroam.EduTopAppBar
 import app.eduroam.geteduroam.R
-import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
-import app.eduroam.geteduroam.di.repository.NotificationRepository
+import app.eduroam.geteduroam.ui.HibernationExemptionDialog
+import app.eduroam.geteduroam.ui.launchManageUnusedAppRestrictionsIntent
 import app.eduroam.geteduroam.organizations.PassphraseDialog
 import app.eduroam.geteduroam.organizations.UsernamePasswordDialog
 import app.eduroam.geteduroam.ui.PrimaryButton
@@ -66,14 +69,20 @@ fun WifiConfigScreen(
     val passphraseDialogRetryCount by viewModel.passphraseDialogRetryCount.collectAsState(0)
     val showPassphraseDialog by viewModel.showPassphraseDialog.collectAsState(false)
 
+    var showHibernationDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            viewModel.scheduleReminderNotification()
+            if (viewModel.shouldRequestHibernationExemption()) {
+                showHibernationDialog = true
+            } else {
+                viewModel.scheduleReminderNotification()
+            }
         }
     }
-    val context = LocalContext.current
     launch?.let {
         LaunchedEffect(it) {
             viewModel.launchConfiguration(context)
@@ -135,6 +144,8 @@ fun WifiConfigScreen(
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     }
+                } else if (viewModel.shouldRequestHibernationExemption()) {
+                    showHibernationDialog = true
                 } else {
                     viewModel.scheduleReminderNotification()
                 }
@@ -174,6 +185,19 @@ fun WifiConfigScreen(
         if (askNetworkPermission) {
             AskForWiFiPermissions { viewModel.handleAndroid10WifiConfig(context) }
         }
+    }
+    if (showHibernationDialog) {
+        HibernationExemptionDialog(
+            onConfirm = {
+                showHibernationDialog = false
+                launchManageUnusedAppRestrictionsIntent(context)
+                viewModel.scheduleReminderNotification()
+            },
+            onDismiss = {
+                showHibernationDialog = false
+                viewModel.scheduleReminderNotification()
+            }
+        )
     }
     if (showUsernameDialog) {
         UsernamePasswordDialog(

@@ -18,6 +18,7 @@ import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.config.model.localizedMatch
 import app.eduroam.geteduroam.extensions.stripLogos
 import app.eduroam.geteduroam.di.api.GetEduroamApi
+import app.eduroam.geteduroam.di.repository.NotificationRepository
 import app.eduroam.geteduroam.di.repository.StorageRepository
 import app.eduroam.geteduroam.models.DiscoveryResult
 import app.eduroam.geteduroam.models.Profile
@@ -42,6 +43,7 @@ class SelectProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     val api: GetEduroamApi,
     private val storageRepository: StorageRepository,
+    private val notificationRepository: NotificationRepository,
 ) : ViewModel() {
 
     private val parser = AndroidConfigParser()
@@ -67,9 +69,14 @@ class SelectProfileViewModel @Inject constructor(
             if (institutionId == configuredOrganization?.id || customHost?.toString() == configuredOrganization?.id) {
                 previouslyConfiguredProfileId = storageRepository.configuredProfileLastConfig.firstOrNull()?.first
                 val profileExpiryTimestampMs = storageRepository.profileExpiryTimestampMs.first()
+                val lastConfig = storageRepository.configuredProfileLastConfig.firstOrNull()
+                val showHibernationDialog = lastConfig?.second?.eapIdentityProvider?.firstOrNull()?.let { provider ->
+                    notificationRepository.shouldRequestHibernationExemption(provider, configuredOrganization?.id ?: "")
+                } ?: false
                 uiState = uiState.copy(
                     configuredOrganization = configuredOrganization,
-                    profileExpiryTimestampMs = profileExpiryTimestampMs
+                    profileExpiryTimestampMs = profileExpiryTimestampMs,
+                    showHibernationExemptionDialog = showHibernationDialog
                 )
             }
             if (institutionId.isNotBlank()) {
@@ -430,5 +437,18 @@ class SelectProfileViewModel @Inject constructor(
 
     fun requestReconfiguration() {
         uiState = uiState.copy(showAlertForConfiguringDifferentProfile = uiState.profiles.firstOrNull { it.isConfigured })
+    }
+
+    fun dismissHibernationExemptionDialog() {
+        uiState = uiState.copy(showHibernationExemptionDialog = false)
+    }
+
+    fun scheduleReminderNotification() {
+        val organizationId = uiState.configuredOrganization?.id ?: return
+        viewModelScope.launch {
+            val provider = storageRepository.configuredProfileLastConfig.firstOrNull()
+                ?.second?.eapIdentityProvider?.firstOrNull() ?: return@launch
+            notificationRepository.scheduleNotificationIfNeeded(provider, organizationId)
+        }
     }
 }

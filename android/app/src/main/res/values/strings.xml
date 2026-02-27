@@ -81,6 +81,11 @@
     <string name="username_password_placeholder_username_before_suffix">username</string>
     <string name="username_password_accessibility_hide_password">Hide password</string>
     <string name="username_password_accessibility_show_password">Show password</string>
+    <string name="hibernation_exemption_dialog_title">Keep notifications active</string>
+    <string name="hibernation_exemption_dialog_message">To ensure you receive a reminder before your WiFi certificate expires, please disable unused app restrictions for %s. Without this, Android may put the app to sleep after a period of inactivity and prevent the reminder from being delivered.</string>
+    <string name="hibernation_exemption_dialog_confirm">Open settings</string>
+    <string name="hibernation_exemption_dialog_dismiss">Skip</string>
+
     <string name="notification_channel_description">Reminds you when your configuration will expire soon</string>
     <string name="notification_channel_name">Reconfiguration reminders</string>
     <string name="notification_title">Reconfigure %s</string>
