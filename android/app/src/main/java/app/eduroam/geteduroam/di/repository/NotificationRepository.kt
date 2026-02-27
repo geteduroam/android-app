@@ -81,7 +81,6 @@ class NotificationRepository(
 
         val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
             .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
-            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
             .setInputData(inputData)
             .addTag(WORK_TAG)
             .build()
