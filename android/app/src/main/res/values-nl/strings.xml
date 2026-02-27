@@ -78,6 +78,11 @@
     <string name="username_password_placeholder_username_before_suffix">gebruikersnaam</string>
     <string name="username_password_accessibility_hide_password">Verberg wachtwoord</string>
     <string name="username_password_accessibility_show_password">Toon wachtwoord</string>
+    <string name="hibernation_exemption_dialog_title">Meldingen actief houden</string>
+    <string name="hibernation_exemption_dialog_message">Om er zeker van te zijn dat je een herinnering ontvangt voordat je WiFi-certificaat verloopt, schakel je de ongebruikte app-beperkingen uit voor %s. Zonder dit kan Android de app na een periode van inactiviteit in slaapstand zetten, waardoor de herinnering niet wordt afgeleverd.</string>
+    <string name="hibernation_exemption_dialog_confirm">Instellingen openen</string>
+    <string name="hibernation_exemption_dialog_dismiss">Overslaan</string>
+
     <string name="notification_channel_description">Herinnert je eraan wanneer je configuratie verloopt</string>
     <string name="notification_channel_name">Herinnering om opnieuw in te stellen</string>
     <string name="notification_title">Stel %s opnieuw in</string>

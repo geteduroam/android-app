@@ -19,23 +19,31 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.core.content.PackageManagerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.eduroam.geteduroam.EduTopAppBar
 import app.eduroam.geteduroam.R
@@ -66,14 +74,20 @@ fun WifiConfigScreen(
     val passphraseDialogRetryCount by viewModel.passphraseDialogRetryCount.collectAsState(0)
     val showPassphraseDialog by viewModel.showPassphraseDialog.collectAsState(false)
 
+    var showHibernationDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            viewModel.scheduleReminderNotification()
+            if (viewModel.shouldRequestHibernationExemption()) {
+                showHibernationDialog = true
+            } else {
+                viewModel.scheduleReminderNotification()
+            }
         }
     }
-    val context = LocalContext.current
     launch?.let {
         LaunchedEffect(it) {
             viewModel.launchConfiguration(context)
@@ -135,6 +149,8 @@ fun WifiConfigScreen(
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     }
+                } else if (viewModel.shouldRequestHibernationExemption()) {
+                    showHibernationDialog = true
                 } else {
                     viewModel.scheduleReminderNotification()
                 }
@@ -174,6 +190,20 @@ fun WifiConfigScreen(
         if (askNetworkPermission) {
             AskForWiFiPermissions { viewModel.handleAndroid10WifiConfig(context) }
         }
+    }
+    if (showHibernationDialog) {
+        HibernationExemptionDialog(
+            onConfirm = {
+                showHibernationDialog = false
+                val intent = PackageManagerCompat.createManageUnusedAppRestrictionsIntent(context)
+                context.startActivity(intent)
+                viewModel.scheduleReminderNotification()
+            },
+            onDismiss = {
+                showHibernationDialog = false
+                viewModel.scheduleReminderNotification()
+            }
+        )
     }
     if (showUsernameDialog) {
         UsernamePasswordDialog(
@@ -291,6 +321,17 @@ private fun getTextToShowGivenPermissions(
     return textToShow.toString()
 }
 
+@PreviewLightDark
+@Composable
+private fun HibernationExemptionDialog_Preview() {
+    AppTheme {
+        HibernationExemptionDialog(
+            onConfirm = {},
+            onDismiss = {}
+        )
+    }
+}
+
 @Preview
 @Composable
 private fun WifiConfigScreen_Preview() {
@@ -301,4 +342,42 @@ private fun WifiConfigScreen_Preview() {
             goBack = {}
         )
     }
+}
+
+@Composable
+private fun HibernationExemptionDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(R.string.hibernation_exemption_dialog_title),
+                style = MaterialTheme.typography.titleLarge,
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(R.string.hibernation_exemption_dialog_message, stringResource(R.string.name)),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(
+                    text = stringResource(R.string.hibernation_exemption_dialog_confirm),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    text = stringResource(R.string.hibernation_exemption_dialog_dismiss),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            }
+        }
+    )
 }
