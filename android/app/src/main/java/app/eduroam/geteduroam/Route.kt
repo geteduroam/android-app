@@ -8,6 +8,7 @@ import android.os.Parcelable
 import androidx.navigation.NavType
 import app.eduroam.geteduroam.config.AndroidConfigParser
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
+import app.eduroam.geteduroam.extensions.stripLogos
 import app.eduroam.geteduroam.models.Configuration
 import app.eduroam.geteduroam.models.ConfigSource
 import app.eduroam.geteduroam.organizations.ConfiguredOrganization
@@ -166,7 +167,7 @@ sealed class Route {
                         id = provider.eapIdentityProvider?.firstOrNull()?.ID ?: ConfiguredOrganization.ID_ORGANIZATION_FROM_FILE,
                         name = null,
                         country = null
-                    ), null, provider)
+                    ), null, provider.stripLogos())
                 } catch (ex: Exception) {
                     Timber.w(ex, "Could not parse file opened!")
                     null

@@ -56,7 +56,7 @@ internal object EduroamModule {
             .callTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
         if (BuildConfig.DEBUG) {
-            builder.addInterceptor(loggingInterceptor)
+            //builder.addInterceptor(loggingInterceptor)
         }
         builder.addInterceptor(object: Interceptor {
             override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
