@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
         handleNewIntent(intent)
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleNewIntent(intent)
     }
