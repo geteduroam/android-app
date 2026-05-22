@@ -109,7 +109,7 @@ class SelectOrganizationViewModel @Inject constructor(
     fun onSearchTextChange(filter: String) {
         val filtered = if (filter.isNotBlank()) {
             val normalizedFilter = filter.removeNonSpacingMarks()
-            val filterWords = filter.split(" ")
+            val filterWords = normalizedFilter.split(" ")
             allOrganizations.filter { organization ->
                 if (filterWords.size == 1) {
                     organization.matchWords.any {
