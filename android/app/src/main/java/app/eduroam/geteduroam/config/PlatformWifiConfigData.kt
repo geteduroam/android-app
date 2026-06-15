@@ -136,8 +136,13 @@ private fun EAPIdentityProviderList.buildEnterpriseConfig(): WifiEnterpriseConfi
 }
 
 fun EAPIdentityProvider.requiresUsernamePrompt(): Boolean {
-    val eapMethod = authenticationMethod?.bestMethod()?.eapMethod?.type?.toInt()?.convertEAPMethod()
-    return  eapMethod == Eap.TTLS || eapMethod == Eap.PEAP || eapMethod == Eap.PWD
+	val authMethod = authenticationMethod?.bestMethod() ?: return false
+	val credential = authMethod.clientSideCredential
+	return when(authMethod.eapMethod?.type?.toInt()?.convertEAPMethod()) {
+		Eap.TTLS,Eap.PEAP,Eap.PWD -> "" == credential?.userName ?: "" &&
+			"" == credential?.password ?: ""
+		else -> false
+	}
 }
 
 fun EAPIdentityProvider.requiredSuffix(): String? {
