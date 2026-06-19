@@ -136,13 +136,13 @@ private fun EAPIdentityProviderList.buildEnterpriseConfig(): WifiEnterpriseConfi
 }
 
 fun EAPIdentityProvider.requiresUsernamePrompt(): Boolean {
-	val authMethod = authenticationMethod?.bestMethod() ?: return false
-	val credential = authMethod.clientSideCredential
-	return when(authMethod.eapMethod?.type?.toInt()?.convertEAPMethod()) {
-		Eap.TTLS,Eap.PEAP,Eap.PWD -> "" == credential?.userName ?: "" &&
-			"" == credential?.password ?: ""
-		else -> false
-	}
+    val authMethod = authenticationMethod?.bestMethod() ?: return false
+    val credential = authMethod.clientSideCredential
+    return when (authMethod.eapMethod?.type?.toInt()?.convertEAPMethod()) {
+        Eap.TTLS, Eap.PEAP, Eap.PWD ->
+            credential?.userName.isNullOrBlank() || credential?.password.isNullOrBlank()
+        else -> false
+    }
 }
 
 fun EAPIdentityProvider.requiredSuffix(): String? {
@@ -285,8 +285,12 @@ fun EAPIdentityProviderList.buildPasspointConfig(): PasspointConfiguration? {
                 eapIdentityProvider?.authenticationMethod?.bestMethod()?.clientSideCredential?.userName
             val password =
                 eapIdentityProvider?.authenticationMethod?.bestMethod()?.clientSideCredential?.password
+            if (password == null) {
+                Timber.w("Not creating Passpoint configuration due to missing password")
+                return null
+            }
             val passwordBytes =
-                password!!.toByteArray(Charset.defaultCharset()) // TODO explicitly use UTF-8?
+                password.toByteArray(Charset.defaultCharset()) // TODO explicitly use UTF-8?
             val base64 = Base64.encodeToString(passwordBytes, Base64.DEFAULT)
             val us = Credential.UserCredential()
             us.username = username
