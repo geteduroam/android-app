@@ -94,14 +94,23 @@ class OAuthViewModel @Inject constructor(
             }
             val authorizationIntent = createAuthorizationIntent(context)
             if (authorizationIntent != null) {
+                Timber.d(
+                    "Authorization intent built, browser package selected by AppAuth: %s",
+                    authorizationIntent.`package` ?: authorizationIntent.component?.packageName ?: "unknown"
+                )
                 uiState = UiState(OAuthStep.Initialized(authorizationIntent))
             } else {
+                Timber.d("No authorization intent available, triggering WebView fallback")
                 uiState = UiState(OAuthStep.WebViewFallback(configuration, repository.authRequest.first()!!.toUri()))
             }
         } catch (e: Exception) {
             Timber.w(e, "Unable to initialize AppAuth!")
             if (e is ActivityNotFoundException) {
                 // Could not find a browser good enough to open, we continue with WebView fallback
+                Timber.i(
+                    e,
+                    "No browser allowed by AppAuth's BrowserAllowList could be resolved, triggering WebView fallback"
+                )
                 try {
                     uiState = UiState(OAuthStep.WebViewFallback(configuration, repository.authRequest.first()!!.toUri()))
                     return@launch
@@ -150,6 +159,11 @@ class OAuthViewModel @Inject constructor(
                 packagesSupportingCustomTabs.add(info)
             }
         }
+        Timber.d(
+            "Custom Tabs capable packages found: %s",
+            packagesSupportingCustomTabs.joinToString { it.activityInfo.packageName }
+                .ifEmpty { "none" }
+        )
         return packagesSupportingCustomTabs
     }
 
@@ -162,9 +176,11 @@ class OAuthViewModel @Inject constructor(
 
         val requestUri = currentAuthRequest.toUri()
         if (isCustomTabSupported(context, requestUri)) {
+            Timber.d("Custom Tabs supported, warming up browser and building authorization intent")
             val customTabIntent = warmupBrowser()
             return availableService.getAuthorizationRequestIntent(currentAuthRequest, customTabIntent)
         } else {
+            Timber.d("No Custom Tabs capable browser found, returning null authorization intent")
             return null
         }
     }
