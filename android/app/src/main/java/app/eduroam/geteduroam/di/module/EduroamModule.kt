@@ -22,6 +22,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -73,9 +74,11 @@ internal object EduroamModule {
                 val androidVersion = android.os.Build.VERSION.RELEASE
                 val versionWithoutBuild = BuildConfig.VERSION_NAME.split("(").first()
 
+                val userAgent = "$appName/${versionWithoutBuild} (${BuildConfig.VERSION_CODE}; Android ${androidVersion}; $manufacturer $device $model)"
                 val newRequest = request.newBuilder()
-                    .header("User-Agent", "$appName/${versionWithoutBuild} (${BuildConfig.VERSION_CODE}; Android ${androidVersion}; $manufacturer $device $model)")
+                    .header("User-Agent", userAgent)
                     .build()
+                Timber.d("[UserAgent] ${request.method} ${request.url} -> $userAgent")
                 return chain.proceed(newRequest)
             }
         })

@@ -44,6 +44,7 @@ class SelectProfileViewModel @Inject constructor(
     val api: GetEduroamApi,
     private val storageRepository: StorageRepository,
     private val notificationRepository: NotificationRepository,
+    private val okHttpClient: OkHttpClient,
 ) : ViewModel() {
 
     private val parser = AndroidConfigParser()
@@ -311,7 +312,6 @@ class SelectProfileViewModel @Inject constructor(
     }
 
     private suspend fun downloadEapConfig(url: String, authorizationHeader: String?): EAPIdentityProviderList? {
-        val client = OkHttpClient.Builder().build()
         var requestBuilder = Request.Builder()
             .url(url)
             .method("POST", byteArrayOf().toRequestBody())
@@ -319,7 +319,8 @@ class SelectProfileViewModel @Inject constructor(
             requestBuilder = requestBuilder.addHeader("Authorization", authorizationHeader)
         }
         try {
-            val response = client.newCall(requestBuilder.build()).execute()
+            Timber.d("[UserAgent] downloadEapConfig requesting $url via injected okHttpClient (${okHttpClient.interceptors.size} interceptors)")
+            val response = okHttpClient.newCall(requestBuilder.build()).execute()
             val bytes = response.body?.bytes()
             response.close()
             if (bytes == null) {
