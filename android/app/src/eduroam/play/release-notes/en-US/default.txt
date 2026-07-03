@@ -1,3 +1,4 @@
-Release notes for version 2.2.0 (2685)
+Release notes for version 2.3.0 (2687)
 ================================
-171f9c9 Merge pull request #168 from geteduroam/bugfix/PrefilledCredentials
+3446489 Merge pull request #171 from geteduroam/feature/networking-improvements
+ee45cf4 Merge pull request #172 from geteduroam/#170-OAuth-browser-support
