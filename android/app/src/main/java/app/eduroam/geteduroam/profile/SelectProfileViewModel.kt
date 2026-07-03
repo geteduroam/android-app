@@ -18,9 +18,11 @@ import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.config.model.localizedMatch
 import app.eduroam.geteduroam.extensions.stripLogos
 import app.eduroam.geteduroam.di.api.GetEduroamApi
+import app.eduroam.geteduroam.di.repository.DiscoveryRepository
 import app.eduroam.geteduroam.di.repository.NotificationRepository
 import app.eduroam.geteduroam.di.repository.StorageRepository
 import app.eduroam.geteduroam.models.DiscoveryResult
+import app.eduroam.geteduroam.models.Organization
 import app.eduroam.geteduroam.models.Profile
 import app.eduroam.geteduroam.ui.ErrorData
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,8 +44,10 @@ class SelectProfileViewModel @Inject constructor(
     @ApplicationContext context: Context,
     savedStateHandle: SavedStateHandle,
     val api: GetEduroamApi,
+    private val discoveryRepository: DiscoveryRepository,
     private val storageRepository: StorageRepository,
     private val notificationRepository: NotificationRepository,
+    private val okHttpClient: OkHttpClient,
 ) : ViewModel() {
 
     private val parser = AndroidConfigParser()
@@ -59,11 +63,16 @@ class SelectProfileViewModel @Inject constructor(
 
     private var didAgreeToTerms = false
     private var previouslyConfiguredProfileId: String? = null
+    private var preFetchedOrganization: Organization?
 
     init {
         val data = savedStateHandle.toRoute<Route.SelectProfile>(NavTypes.allTypesMap)
         institutionId = data.institutionId ?: ""
         customHost = data.customHostUri?.let { Uri.parse(it) }
+        // Only trust a forwarded Organization if it actually carries profiles - a real fetch
+        // always resolves at least one, so an empty list means this is a display-only
+        // placeholder (e.g. the "previously configured" row) rather than fetched data.
+        preFetchedOrganization = data.organization?.takeIf { it.id == institutionId && it.profiles.isNotEmpty() }
         viewModelScope.launch {
             val configuredOrganization = storageRepository.configuredOrganization.first()
             if (institutionId == configuredOrganization?.id || customHost?.toString() == configuredOrganization?.id) {
@@ -96,9 +105,18 @@ class SelectProfileViewModel @Inject constructor(
 
     private suspend fun loadDataFromInstitution() {
         uiState = uiState.copy(inProgress = true)
+
+        val preFetched = preFetchedOrganization
+        if (preFetched != null) {
+            // Already resolved by SelectOrganizationViewModel moments earlier, so there's no need
+            // to download the full (multi-MB) discovery.json a second time for the same data.
+            applySelectedInstitution(preFetched)
+            return
+        }
+
         var responseError: String? = null
         val institutionResult: DiscoveryResult? = try {
-            val response = api.discover()
+            val response = discoveryRepository.discover()
             if (!response.isSuccessful) {
                 responseError = "${response.code()}/${response.message()}]${response.errorBody()?.string()}"
             }
@@ -113,53 +131,7 @@ class SelectProfileViewModel @Inject constructor(
         if (institutionResult != null) {
             val selectedInstitution = institutionResult.content.institutions.find { it.id == institutionId }
             if (selectedInstitution != null) {
-                val isSingleProfile = selectedInstitution.profiles.size == 1
-                val profileIdToSelect  = if (previouslyConfiguredProfileId != null) {
-                    previouslyConfiguredProfileId
-                } else {
-                    selectedInstitution.profiles.firstOrNull()?.id
-                }
-                val presentProfiles = selectedInstitution.profiles.map { profile ->
-                    val result: PresentProfile
-                    if (profile.type == Profile.Type.letswifi) {
-                        try {
-                            result = PresentProfile(
-                                profile = resolveLetswifiProfile(profile),
-                                isConfigured = previouslyConfiguredProfileId == profile.id,
-                                isSelected = profileIdToSelect == profile.id
-                            )
-                        } catch (ex: Exception) {
-                            Timber.w(ex, "Could not fetch letswifi profile!")
-                            uiState = uiState.copy(
-                                inProgress = false,
-                                errorData = ErrorData(
-                                    titleId = R.string.err_title_generic_fail,
-                                    messageId = R.string.err_msg_could_not_discover_profile_configuration
-                                )
-                            )
-                            return
-                        }
-                    } else {
-                        result = PresentProfile(
-                            profile = profile,
-                            isConfigured = previouslyConfiguredProfileId == profile.id,
-                            isSelected = profileIdToSelect == profile.id
-                        )
-                    }
-                    result
-                }
-                val autoConnectWithSingleProfile = isSingleProfile && !presentProfiles[0].isConfigured && uiState.configuredOrganization == null
-                uiState = uiState.copy(
-                    inProgress = autoConnectWithSingleProfile,
-                    profiles = presentProfiles,
-                    organization = PresentOrganization(
-                        name = selectedInstitution.getLocalizedName(), location = selectedInstitution.country
-                    )
-                )
-                if (autoConnectWithSingleProfile) {
-                    Timber.i("Single profile for institution. Continue with configuration")
-                    connectWithProfile(presentProfiles[0].profile, startOAuthFlowIfNoAccess = true)
-                }
+                applySelectedInstitution(selectedInstitution)
             } else {
                 Timber.w("Could not find institution with id $institutionId")
                 uiState = uiState.copy(
@@ -182,6 +154,56 @@ class SelectProfileViewModel @Inject constructor(
                 )
             )
 
+        }
+    }
+
+    private suspend fun applySelectedInstitution(selectedInstitution: Organization) {
+        val isSingleProfile = selectedInstitution.profiles.size == 1
+        val profileIdToSelect  = if (previouslyConfiguredProfileId != null) {
+            previouslyConfiguredProfileId
+        } else {
+            selectedInstitution.profiles.firstOrNull()?.id
+        }
+        val presentProfiles = selectedInstitution.profiles.map { profile ->
+            val result: PresentProfile
+            if (profile.type == Profile.Type.letswifi) {
+                try {
+                    result = PresentProfile(
+                        profile = resolveLetswifiProfile(profile),
+                        isConfigured = previouslyConfiguredProfileId == profile.id,
+                        isSelected = profileIdToSelect == profile.id
+                    )
+                } catch (ex: Exception) {
+                    Timber.w(ex, "Could not fetch letswifi profile!")
+                    uiState = uiState.copy(
+                        inProgress = false,
+                        errorData = ErrorData(
+                            titleId = R.string.err_title_generic_fail,
+                            messageId = R.string.err_msg_could_not_discover_profile_configuration
+                        )
+                    )
+                    return
+                }
+            } else {
+                result = PresentProfile(
+                    profile = profile,
+                    isConfigured = previouslyConfiguredProfileId == profile.id,
+                    isSelected = profileIdToSelect == profile.id
+                )
+            }
+            result
+        }
+        val autoConnectWithSingleProfile = isSingleProfile && !presentProfiles[0].isConfigured && uiState.configuredOrganization == null
+        uiState = uiState.copy(
+            inProgress = autoConnectWithSingleProfile,
+            profiles = presentProfiles,
+            organization = PresentOrganization(
+                name = selectedInstitution.getLocalizedName(), location = selectedInstitution.country
+            )
+        )
+        if (autoConnectWithSingleProfile) {
+            Timber.i("Single profile for institution. Continue with configuration")
+            connectWithProfile(presentProfiles[0].profile, startOAuthFlowIfNoAccess = true)
         }
     }
 
@@ -311,7 +333,6 @@ class SelectProfileViewModel @Inject constructor(
     }
 
     private suspend fun downloadEapConfig(url: String, authorizationHeader: String?): EAPIdentityProviderList? {
-        val client = OkHttpClient.Builder().build()
         var requestBuilder = Request.Builder()
             .url(url)
             .method("POST", byteArrayOf().toRequestBody())
@@ -319,7 +340,7 @@ class SelectProfileViewModel @Inject constructor(
             requestBuilder = requestBuilder.addHeader("Authorization", authorizationHeader)
         }
         try {
-            val response = client.newCall(requestBuilder.build()).execute()
+            val response = okHttpClient.newCall(requestBuilder.build()).execute()
             val bytes = response.body?.bytes()
             response.close()
             if (bytes == null) {

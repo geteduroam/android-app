@@ -11,6 +11,7 @@ import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.extensions.stripLogos
 import app.eduroam.geteduroam.models.Configuration
 import app.eduroam.geteduroam.models.ConfigSource
+import app.eduroam.geteduroam.models.Organization
 import app.eduroam.geteduroam.organizations.ConfiguredOrganization
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -128,11 +129,50 @@ object NavTypes {
         }
     }
 
+    val OrganizationNavType = object: NavType<Organization?>(isNullableAllowed = true) {
+        override fun get(bundle: Bundle, key: String): Organization? {
+            val string = bundle.getString(key)
+            return if (string.isNullOrEmpty()) {
+                null
+            } else {
+                val decodedString = Uri.decode(string)
+                Json.decodeFromString(decodedString)
+            }
+        }
+
+        override fun parseValue(value: String): Organization? {
+            if (value.isEmpty()) {
+                return null
+            }
+            val decoded = Uri.decode(value)
+            return Json.decodeFromString(decoded)
+        }
+
+        override fun serializeAsValue(value: Organization?): String {
+            if (value == null) {
+                return ""
+            }
+            val string = Json.encodeToString(value)
+            return Uri.encode(string)
+        }
+
+        override fun put(bundle: Bundle, key: String, value: Organization?) {
+            if (value == null) {
+                bundle.putString(key, null)
+            } else {
+                val string = Json.encodeToString(value)
+                val encodedString = Uri.encode(string)
+                bundle.putString(key, encodedString)
+            }
+        }
+    }
+
     val allTypesMap = mapOf(
         typeOf<Configuration>() to ConfigurationNavType,
         typeOf<EAPIdentityProviderList>() to EAPIdentityProviderListNavType,
         typeOf<ConfigSource>() to ConfigSourceNavType,
-        typeOf<ConfiguredOrganization>() to ConfiguredOrganizationNavType
+        typeOf<ConfiguredOrganization>() to ConfiguredOrganizationNavType,
+        typeOf<Organization?>() to OrganizationNavType
     )
 }
 
@@ -143,7 +183,11 @@ sealed class Route {
     data object StatusScreen : Route()
     @Serializable
     @Parcelize
-    data class SelectProfile(val institutionId: String?, val customHostUri: String?) : Route(), Parcelable
+    data class SelectProfile(
+        val institutionId: String?,
+        val customHostUri: String?,
+        val organization: Organization? = null
+    ) : Route(), Parcelable
     @Serializable
     data class OAuth(val configuration: Configuration, val redirectUri: String?): Route()
     @Serializable
