@@ -68,7 +68,7 @@ import androidx.core.net.toUri
 @Composable
 fun SelectOrganizationScreen(
     viewModel: SelectOrganizationViewModel,
-    openProfileModal: (String) -> Unit,
+    openProfileModal: (String, Organization?) -> Unit,
     goToOAuth: (Configuration) -> Unit,
     goToConfigScreen: (ConfiguredOrganization, String?, EAPIdentityProviderList) -> Unit,
     openFileUri: (Uri) -> Unit,
@@ -108,7 +108,9 @@ fun SelectOrganizationScreen(
         if (!viewModel.uiState.didShowConfiguredOrganization) {
             if (!organizationId.isNullOrEmpty() && configuredOrganization.source == ConfigSource.Discovery) {
                 viewModel.configuredProfileModalShown()
-                openProfileModal(organizationId)
+                // Fired from locally stored state, ahead of the discovery fetch resolving, so no
+                // Organization is available yet here. SelectProfileViewModel will fetch it itself.
+                openProfileModal(organizationId, null)
             } else if (!organizationId.isNullOrEmpty() && configuredOrganization.source == ConfigSource.Url) {
                 viewModel.configuredProfileModalShown()
                 discoverUrl(organizationId.toUri())
@@ -121,8 +123,12 @@ fun SelectOrganizationScreen(
             snapshotFlow { viewModel.uiState }.distinctUntilChanged()
                 .filter { it.selectedOrganization != null }.flowWithLifecycle(lifecycle).collect {
                     waitForVmEvent = false
+                    val selectedOrganization = it.selectedOrganization
+                    // Already resolved from the just-fetched search results, so pass it along
+                    // instead of making SelectProfileViewModel fetch the same data again.
                     currentOpenProfileModal(
-                        it.selectedOrganization?.id.orEmpty(),
+                        selectedOrganization?.id.orEmpty(),
+                        selectedOrganization
                     )
                     viewModel.clearSelection()
                 }

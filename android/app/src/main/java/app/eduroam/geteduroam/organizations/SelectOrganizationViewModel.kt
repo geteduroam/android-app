@@ -8,7 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.eduroam.geteduroam.R
-import app.eduroam.geteduroam.di.api.GetEduroamApi
+import app.eduroam.geteduroam.di.repository.DiscoveryRepository
 import app.eduroam.geteduroam.di.repository.StorageRepository
 import app.eduroam.geteduroam.extensions.removeNonSpacingMarks
 import app.eduroam.geteduroam.models.Organization
@@ -25,7 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SelectOrganizationViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val api: GetEduroamApi,
+    private val discoveryRepository: DiscoveryRepository,
     private val storageRepository: StorageRepository
 ) : ViewModel() {
 
@@ -45,7 +45,7 @@ class SelectOrganizationViewModel @Inject constructor(
                 withContext(Dispatchers.Main) {
                     uiState = uiState.copy(configuredOrganization = configuredOrganization)
                 }
-                val response = api.discover()
+                val response = discoveryRepository.discover()
                 val discoveryResult = response.body()
                 if (response.isSuccessful && discoveryResult != null) {
                     withContext(Dispatchers.Main) {

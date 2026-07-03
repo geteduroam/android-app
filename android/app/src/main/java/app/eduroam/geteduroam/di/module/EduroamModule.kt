@@ -5,6 +5,7 @@ import app.eduroam.geteduroam.BuildConfig
 import app.eduroam.geteduroam.di.api.GetEduroamApi
 import app.eduroam.geteduroam.di.api.response.ApiResponseAdapterFactory
 import app.eduroam.geteduroam.di.assist.AuthenticationAssistant
+import app.eduroam.geteduroam.di.repository.DiscoveryRepository
 import app.eduroam.geteduroam.di.repository.NotificationRepository
 import app.eduroam.geteduroam.di.repository.StorageRepository
 import app.eduroam.geteduroam.models.Profile
@@ -22,7 +23,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
-import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -46,6 +46,12 @@ internal object EduroamModule {
     internal fun providesNotificationRepository(
         @ApplicationContext context: Context,
     ) = NotificationRepository(context)
+
+    @Provides
+    @Singleton
+    internal fun providesDiscoveryRepository(
+        api: GetEduroamApi,
+    ) = DiscoveryRepository(api)
 
 
     @Provides
@@ -74,11 +80,9 @@ internal object EduroamModule {
                 val androidVersion = android.os.Build.VERSION.RELEASE
                 val versionWithoutBuild = BuildConfig.VERSION_NAME.split("(").first()
 
-                val userAgent = "$appName/${versionWithoutBuild} (${BuildConfig.VERSION_CODE}; Android ${androidVersion}; $manufacturer $device $model)"
                 val newRequest = request.newBuilder()
-                    .header("User-Agent", userAgent)
+                    .header("User-Agent", "$appName/${versionWithoutBuild} (${BuildConfig.VERSION_CODE}; Android ${androidVersion}; $manufacturer $device $model)")
                     .build()
-                Timber.d("[UserAgent] ${request.method} ${request.url} -> $userAgent")
                 return chain.proceed(newRequest)
             }
         })

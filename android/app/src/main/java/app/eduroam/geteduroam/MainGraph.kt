@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import app.eduroam.geteduroam.config.WifiConfigScreen
 import app.eduroam.geteduroam.config.WifiConfigViewModel
+import app.eduroam.geteduroam.models.Organization
 import app.eduroam.geteduroam.oauth.OAuthScreen
 import app.eduroam.geteduroam.oauth.OAuthViewModel
 import app.eduroam.geteduroam.organizations.SelectOrganizationScreen
@@ -34,10 +35,16 @@ fun MainGraph(
             val focusManager = LocalFocusManager.current
             SelectOrganizationScreen(
                 viewModel = viewModel,
-                openProfileModal = { institutionId ->
+                openProfileModal = { institutionId, organization ->
                     // Remove the focus from the search field (if it was there)
                     focusManager.clearFocus(force = true)
-                    navController.navigate(Route.SelectProfile(institutionId = institutionId, customHostUri = null))
+                    navController.navigate(
+                        Route.SelectProfile(
+                            institutionId = institutionId,
+                            customHostUri = null,
+                            organization = organization
+                        )
+                    )
                 },
                 goToOAuth = { configuration ->
                     navController.navigate(
