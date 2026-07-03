@@ -16,6 +16,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import app.eduroam.geteduroam.BuildConfig
 import app.eduroam.geteduroam.NavTypes
 import app.eduroam.geteduroam.R
 import app.eduroam.geteduroam.Route
@@ -94,14 +95,27 @@ class OAuthViewModel @Inject constructor(
             }
             val authorizationIntent = createAuthorizationIntent(context)
             if (authorizationIntent != null) {
+                if (BuildConfig.DEBUG) {
+                    // Not logged in release builds: Crashlytics uploads every Timber log, and the
+                    // selected browser package reveals which apps the user has installed.
+                    Timber.d(
+                        "Authorization intent built, browser package selected by AppAuth: %s",
+                        authorizationIntent.`package` ?: authorizationIntent.component?.packageName ?: "unknown"
+                    )
+                }
                 uiState = UiState(OAuthStep.Initialized(authorizationIntent))
             } else {
+                Timber.d("No authorization intent available, triggering WebView fallback")
                 uiState = UiState(OAuthStep.WebViewFallback(configuration, repository.authRequest.first()!!.toUri()))
             }
         } catch (e: Exception) {
             Timber.w(e, "Unable to initialize AppAuth!")
             if (e is ActivityNotFoundException) {
                 // Could not find a browser good enough to open, we continue with WebView fallback
+                Timber.i(
+                    e,
+                    "No Custom Tabs-capable browser could be resolved, triggering WebView fallback"
+                )
                 try {
                     uiState = UiState(OAuthStep.WebViewFallback(configuration, repository.authRequest.first()!!.toUri()))
                     return@launch
@@ -150,6 +164,17 @@ class OAuthViewModel @Inject constructor(
                 packagesSupportingCustomTabs.add(info)
             }
         }
+        if (BuildConfig.DEBUG) {
+            // Not logged in release builds: Crashlytics uploads every Timber log, and the full
+            // package list reveals the user's installed-app inventory. Log only the count there.
+            Timber.d(
+                "Custom Tabs capable packages found: %s",
+                packagesSupportingCustomTabs.joinToString { it.activityInfo.packageName }
+                    .ifEmpty { "none" }
+            )
+        } else {
+            Timber.d("Custom Tabs capable packages found: %d", packagesSupportingCustomTabs.size)
+        }
         return packagesSupportingCustomTabs
     }
 
@@ -162,9 +187,11 @@ class OAuthViewModel @Inject constructor(
 
         val requestUri = currentAuthRequest.toUri()
         if (isCustomTabSupported(context, requestUri)) {
+            Timber.d("Custom Tabs supported, warming up browser and building authorization intent")
             val customTabIntent = warmupBrowser()
             return availableService.getAuthorizationRequestIntent(currentAuthRequest, customTabIntent)
         } else {
+            Timber.d("No Custom Tabs capable browser found, returning null authorization intent")
             return null
         }
     }

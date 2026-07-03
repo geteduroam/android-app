@@ -13,8 +13,8 @@ import net.openid.appauth.ClientAuthentication
 import net.openid.appauth.RegistrationRequest
 import net.openid.appauth.RegistrationResponse
 import net.openid.appauth.TokenResponse
+import net.openid.appauth.browser.AnyBrowserMatcher
 import net.openid.appauth.browser.BrowserAllowList
-import net.openid.appauth.browser.VersionedBrowserMatcher
 import net.openid.appauth.connectivity.DefaultConnectionBuilder
 import timber.log.Timber
 import kotlin.coroutines.suspendCoroutine
@@ -125,9 +125,7 @@ class AuthenticationAssistant {
             val builder = AppAuthConfiguration.Builder()
             builder.setBrowserMatcher(
                 BrowserAllowList(
-                    VersionedBrowserMatcher.CHROME_BROWSER,
-                    VersionedBrowserMatcher.FIREFOX_BROWSER,
-                    VersionedBrowserMatcher.SAMSUNG_BROWSER
+                    AnyBrowserMatcher.INSTANCE
                 )
             )
             builder.setConnectionBuilder(DefaultConnectionBuilder.INSTANCE)
