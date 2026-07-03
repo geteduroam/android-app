@@ -15,7 +15,6 @@ import net.openid.appauth.RegistrationResponse
 import net.openid.appauth.TokenResponse
 import net.openid.appauth.browser.AnyBrowserMatcher
 import net.openid.appauth.browser.BrowserAllowList
-import net.openid.appauth.browser.VersionedBrowserMatcher
 import net.openid.appauth.connectivity.DefaultConnectionBuilder
 import timber.log.Timber
 import kotlin.coroutines.suspendCoroutine
