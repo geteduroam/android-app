@@ -18,7 +18,7 @@ The following software is expected to be available:
 
 # How it works
 
-The app will download a discovery list from `https://discovery.eduroam.app/v2/discovery.json`, and
+The app will download a discovery list from `https://discovery.eduroam.app/v3/discovery.json`, and
 present a searchable list of all institutions to the user. We filter on name and keywords (no
 abbreviations available for now).
 

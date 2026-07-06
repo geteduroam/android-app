@@ -60,6 +60,7 @@ import app.eduroam.geteduroam.config.model.ProviderInfo
 import app.eduroam.geteduroam.config.model.localizedMatch
 import app.eduroam.geteduroam.models.Configuration
 import app.eduroam.geteduroam.organizations.TermsOfUseDialog
+import app.eduroam.geteduroam.models.LocalizedName
 import app.eduroam.geteduroam.models.Profile
 import app.eduroam.geteduroam.models.ConfigSource
 import app.eduroam.geteduroam.organizations.ConfiguredOrganization
@@ -531,6 +532,6 @@ private fun Preview_SelectProfileModal() {
 }
 
 private val profileList = listOf(
-    PresentProfile(Profile(id = "id", name = mapOf("any" to "First profile"), type = Profile.Type.eapConfig), true),
-    PresentProfile(Profile(id = "id", name = mapOf("any" to "Second profile"), type = Profile.Type.eapConfig), false),
+    PresentProfile(Profile(id = "id", name = listOf(LocalizedName(display = "First profile")), type = Profile.Type.eapConfig), true),
+    PresentProfile(Profile(id = "id", name = listOf(LocalizedName(display = "Second profile")), type = Profile.Type.eapConfig), false),
 )

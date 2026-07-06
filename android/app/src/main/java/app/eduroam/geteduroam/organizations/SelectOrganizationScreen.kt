@@ -56,9 +56,9 @@ import androidx.lifecycle.flowWithLifecycle
 import app.eduroam.geteduroam.R
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
 import app.eduroam.geteduroam.models.Configuration
+import app.eduroam.geteduroam.models.LocalizedName
 import app.eduroam.geteduroam.models.Organization
 import app.eduroam.geteduroam.models.ConfigSource
-import app.eduroam.geteduroam.models.Organization.Companion.LANGUAGE_KEY_FALLBACK
 import app.eduroam.geteduroam.ui.ErrorData
 import app.eduroam.geteduroam.ui.theme.AppTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -331,7 +331,7 @@ fun SelectOrganizationContent(
                             organization = Organization(
                                 country = if (configuredOrganization.source == ConfigSource.Url) stringResource(R.string.configuration_source_custom_host) else configuredOrganization.country ?: "",
                                 id = configuredOrganization.id,
-                                name = mapOf(LANGUAGE_KEY_FALLBACK to (configuredOrganization.name ?: configuredOrganization.id)),
+                                name = listOf(LocalizedName(display = configuredOrganization.name ?: configuredOrganization.id)),
                                 profiles = emptyList()
                             ),
                             configuredOrganization = configuredOrganization,

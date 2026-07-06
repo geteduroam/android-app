@@ -22,6 +22,7 @@ import app.eduroam.geteduroam.di.repository.DiscoveryRepository
 import app.eduroam.geteduroam.di.repository.NotificationRepository
 import app.eduroam.geteduroam.di.repository.StorageRepository
 import app.eduroam.geteduroam.models.DiscoveryResult
+import app.eduroam.geteduroam.models.LocalizedName
 import app.eduroam.geteduroam.models.Organization
 import app.eduroam.geteduroam.models.Profile
 import app.eduroam.geteduroam.ui.ErrorData
@@ -129,7 +130,7 @@ class SelectProfileViewModel @Inject constructor(
             null
         }
         if (institutionResult != null) {
-            val selectedInstitution = institutionResult.content.institutions.find { it.id == institutionId }
+            val selectedInstitution = institutionResult.content.providers.find { it.id == institutionId }
             if (selectedInstitution != null) {
                 applySelectedInstitution(selectedInstitution)
             } else {
@@ -212,7 +213,7 @@ class SelectProfileViewModel @Inject constructor(
         try {
             val profile = resolveLetswifiProfile(Profile(
                 id = customHost.toString(),
-                name = mapOf("any" to context.getString(R.string.name)),
+                name = listOf(LocalizedName(display = context.getString(R.string.name))),
                 type = Profile.Type.letswifi,
                 letswifiEndpoint = customHost.toString()
             ))

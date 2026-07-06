@@ -8,7 +8,7 @@ import retrofit2.http.Headers
 import retrofit2.http.Url
 
 interface GetEduroamApi {
-    @GET("v2/discovery.json")
+    @GET("v3/discovery.json")
     suspend fun discover(): Response<DiscoveryResult>
 
     @GET

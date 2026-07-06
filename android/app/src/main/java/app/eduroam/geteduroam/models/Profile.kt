@@ -13,7 +13,7 @@ data class Profile(
     @SerialName("eapconfig_endpoint")
     val eapconfigEndpoint: String? = null,
     val id: String,
-    val name: Map<String, String>,
+    val name: List<LocalizedName> = emptyList(),
     val oauth: Boolean = false,
     @SerialName("authorization_endpoint")
     val authorizationEndpoint: String? = null,
@@ -40,9 +40,9 @@ data class Profile(
 
     fun getLocalizedName(): String {
         val userLanguage = Locale.getDefault().language.lowercase()
-        return name[userLanguage] ?: // 1st option: the name in the user's language
-        name[LANGUAGE_KEY_FALLBACK] ?: // 2nd option: the name in the fallback language (english)
-        name.values.firstOrNull() ?: // 3rd option: any name we can find
+        return name.find { it.lang == userLanguage }?.display ?: // 1st option: the name in the user's language
+        name.find { it.lang == null }?.display ?: // 2nd option: the name in the fallback language
+        name.firstOrNull()?.display ?: // 3rd option: any name we can find
         id // 4th option: the ID, which is always set
     }
     fun createConfiguration() : Configuration {
@@ -57,8 +57,5 @@ data class Profile(
         )
     }
 
-    companion object {
-        private const val LANGUAGE_KEY_FALLBACK = "any"
-    }
 }
 
