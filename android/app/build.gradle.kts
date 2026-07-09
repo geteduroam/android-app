@@ -37,14 +37,12 @@ android {
     namespace = "app.eduroam.geteduroam"
 
     defaultConfig {
+        manifestPlaceholders += mapOf("appAuthRedirectScheme" to "app.eduroam.geteduroam")
         applicationId = "app.eduroam.geteduroam"
         minSdk = libs.versions.android.sdk.min.get().toInt()
         targetSdk = libs.versions.android.sdk.target.get().toInt()
         versionCode = appCode
         versionName = appName
-        manifestPlaceholders += mapOf(
-            "appAuthRedirectScheme" to "app.eduroam.geteduroam"
-        )
         firebaseAppDistribution {
             appId = System.getenv("FIREBASE_APP_ID")
             artifactType = "APK"
@@ -94,14 +92,12 @@ android {
             buildConfigField("String", "DISCOVERY_BASE_URL", "\"https://discovery.eduroam.app/\"")
         }
         create("govroam") {
+            manifestPlaceholders += mapOf("appAuthRedirectScheme" to "app.govroam.getgovroam")
             dimension = "brand"
             applicationId = "app.govroam.getgovroam"
             buildConfigField("String", "OAUTH_CLIENT_ID", "\"app.govroam.getgovroam\"")
             buildConfigField("String", "OAUTH_REDIRECT_URI", "\"app.govroam.getgovroam:/\"")
             buildConfigField("String", "DISCOVERY_BASE_URL", "\"https://discovery.getgovroam.nl/\"")
-            manifestPlaceholders += mapOf(
-                "appAuthRedirectScheme" to "app.govroam.getgovroam"
-            )
         }
         create("fdroid") {
             dimension = "distribution"
