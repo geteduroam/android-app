@@ -24,8 +24,8 @@ data class Organization(
 
     fun getLocalizedName(): String {
         val userLanguage = Locale.getDefault().language.lowercase()
-        return name.find { it.lang == userLanguage }?.display ?: // 1st option: the name in the user's language
-            name.find { it.lang == null }?.display ?: // 2nd option: the name in the fallback language
+        return name.find { it.lang.equals(userLanguage, ignoreCase = true) }?.display ?: // 1st option: the name in the user's language
+            name.find { it.lang.isNullOrBlank() }?.display ?: // 2nd option: the name in the fallback language
             name.firstOrNull()?.display ?: // 3rd option: any name we can find
             id // 4th option: the ID, which is always set
     }
