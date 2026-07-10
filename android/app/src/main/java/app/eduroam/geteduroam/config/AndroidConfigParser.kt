@@ -45,6 +45,6 @@ class AndroidConfigParser {
         val registryMatcher = RegistryMatcher()
         registryMatcher.bind(Date::class.java, DateFormatTransformer(SERVER_DATE_FORMAT))
         val persister = Persister(registryMatcher)
-        persister.read(EAPIdentityProviderList::class.java, source.inputStream())
+        persister.read(EAPIdentityProviderList::class.java, source.inputStream(), false)
     }
 }
