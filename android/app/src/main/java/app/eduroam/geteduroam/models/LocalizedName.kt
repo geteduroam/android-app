@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Parcelize
 @Serializable
-data class DiscoveryContent(
-    val providers: List<Organization>,
-    val seq: Long
+data class LocalizedName(
+    val display: String,
+    val lang: String? = null
 ) : Parcelable

@@ -49,7 +49,7 @@ class SelectOrganizationViewModel @Inject constructor(
                 val discoveryResult = response.body()
                 if (response.isSuccessful && discoveryResult != null) {
                     withContext(Dispatchers.Main) {
-                        allOrganizations = discoveryResult.content.institutions
+                        allOrganizations = discoveryResult.content.providers
                         uiState = uiState.copy(isLoading = false)
                         if (uiState.filter.isNotEmpty()) {
                             onSearchTextChange(uiState.filter)

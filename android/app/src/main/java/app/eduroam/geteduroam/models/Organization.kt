@@ -12,7 +12,7 @@ import java.util.Locale
 data class Organization(
     val country: String,
     val id: String,
-    val name: Map<String, String>,
+    val name: List<LocalizedName>,
     val profiles: List<Profile>,
 ) : Parcelable {
 
@@ -24,9 +24,9 @@ data class Organization(
 
     fun getLocalizedName(): String {
         val userLanguage = Locale.getDefault().language.lowercase()
-        return name[userLanguage] ?: // 1st option: the name in the user's language
-            name[LANGUAGE_KEY_FALLBACK] ?: // 2nd option: the name in the fallback language (english)
-            name.values.firstOrNull() ?: // 3rd option: any name we can find
+        return name.find { it.lang.equals(userLanguage, ignoreCase = true) }?.display ?: // 1st option: the name in the user's language
+            name.find { it.lang.isNullOrBlank() }?.display ?: // 2nd option: the name in the fallback language
+            name.firstOrNull()?.display ?: // 3rd option: any name we can find
             id // 4th option: the ID, which is always set
     }
 
@@ -37,15 +37,15 @@ data class Organization(
      */
     fun improveMatchWords() : Boolean {
         if (matchWordsLevel == 0) {
-            matchWords = name.values.toList()
+            matchWords = name.map { it.display }
             matchWordsLevel = 1
             return true
         } else if (matchWordsLevel == 1) {
             // Split on anything which is non-alphanumeric
-            val namesWords = name.values.map {  it.split(DELIMITER).filter { it.isNotEmpty() }}.toMutableList()
+            val namesWords = name.map { it.display.split(DELIMITER).filter { it.isNotEmpty() }}.toMutableList()
             val namesAbbreviations = namesWords.map { nameWords -> nameWords.map { word -> word.first() }.joinToString("") }
             val words = mutableListOf<String>()
-            words += name.values.toList()
+            words += name.map { it.display }
             words += namesWords.flatten()
             words += namesAbbreviations
             matchWords = words
@@ -60,7 +60,5 @@ data class Organization(
 
     companion object {
         private val DELIMITER = "\\W+".toRegex()
-
-        const val LANGUAGE_KEY_FALLBACK = "any"
     }
 }

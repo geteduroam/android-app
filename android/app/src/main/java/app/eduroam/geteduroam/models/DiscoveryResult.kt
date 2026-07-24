@@ -8,6 +8,6 @@ import kotlinx.serialization.Serializable
 @Parcelize
 @Serializable
 data class DiscoveryResult(
-    @SerialName("http://letswifi.app/discovery#v2")
+    @SerialName("http://letswifi.app/discovery#v3")
     val content: DiscoveryContent
 ) : Parcelable
