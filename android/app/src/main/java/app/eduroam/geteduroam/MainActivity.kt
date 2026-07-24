@@ -69,9 +69,9 @@ class MainActivity : ComponentActivity() {
         job.cancel()
     }
 
-    private fun handleNewIntent(intent: Intent?) {
+    private fun handleNewIntent(intent: Intent) {
         runOnUiThread {
-            if (intent?.dataString?.startsWith("content://") == true) {
+            if (intent.dataString?.startsWith("content://") == true) {
                 coroutineScope.launch {
                     Timber.d("User has opened an .eap-config file with the app...")
                     if (!openFileUri(intent.data!!)) {
@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-            } else if (intent?.hasExtra(NotificationRepository.KEY_EXTRA_PAYLOAD) == true) {
+            } else if (intent.hasExtra(NotificationRepository.KEY_EXTRA_PAYLOAD)) {
                 @Suppress("DEPRECATION")
                 intent.getParcelableExtra<Route.SelectProfile>(NotificationRepository.KEY_EXTRA_PAYLOAD)?.let { payload ->
                     navController?.navigate(payload)
