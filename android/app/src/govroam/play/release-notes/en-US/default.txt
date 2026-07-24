@@ -1,4 +1,4 @@
-Release notes for version 2.3.0 (2687)
+Release notes for version 2.3.0 (2689)
 ================================
-3446489 Merge pull request #171 from geteduroam/feature/networking-improvements
-ee45cf4 Merge pull request #172 from geteduroam/#170-OAuth-browser-support
+dfaffc3 Merge pull request #174 from geteduroam/feature/discovery-v3-support
+fdabec3 Merge pull request #175 from geteduroam/downgrade_perser_strictness
