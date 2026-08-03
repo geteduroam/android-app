@@ -126,9 +126,6 @@ android {
         compose = true
         buildConfig = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -158,7 +155,6 @@ dependencies {
     implementation(libs.androidx.datastore)
     implementation(libs.google.protobuf)
     implementation(libs.accompanist.permissions)
-    implementation(libs.accompanist.bottomsheet)
     implementation(libs.androidx.work.runtime)
     implementation(libs.appauth)
     implementation(libs.simpleframework.xml.parser)
