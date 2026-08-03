@@ -1,4 +1,3 @@
-Release notes for version 2.3.0 (2689)
+Release notes for version 2.3.0 (2690)
 ================================
-dfaffc3 Merge pull request #174 from geteduroam/feature/discovery-v3-support
-fdabec3 Merge pull request #175 from geteduroam/downgrade_perser_strictness
+97714ea Merge pull request #177 from geteduroam/#176-SDK-Upgrade
