@@ -71,7 +71,12 @@ fun EAPIdentityProviderList.buildSSIDSuggestions(): List<WifiNetworkSuggestion> 
 fun EAPIdentityProviderList.buildPasspointSuggestion(): WifiNetworkSuggestion? {
     val passpointConfig = buildPasspointConfig()
     return if (passpointConfig != null) {
-        WifiNetworkSuggestion.Builder().setPasspointConfig(passpointConfig).build()
+        try {
+            WifiNetworkSuggestion.Builder().setPasspointConfig(passpointConfig).build()
+        } catch (ex: IllegalArgumentException) {
+            Timber.w(ex, "Not creating Passpoint suggestion, system rejected the Passpoint configuration as invalid")
+            null
+        }
     } else {
         null
     }
