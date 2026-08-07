@@ -8,6 +8,7 @@ import android.os.Parcelable
 import androidx.navigation.NavType
 import app.eduroam.geteduroam.config.AndroidConfigParser
 import app.eduroam.geteduroam.config.model.EAPIdentityProviderList
+import app.eduroam.geteduroam.extensions.readBytes
 import app.eduroam.geteduroam.extensions.stripLogos
 import app.eduroam.geteduroam.models.Configuration
 import app.eduroam.geteduroam.models.ConfigSource
@@ -205,7 +206,6 @@ sealed class Route {
                 val configParser = AndroidConfigParser()
                 return@withContext try {
                     val provider = configParser.parse(bytes)
-                    inputStream.close()
                     ConfigureWifi(ConfiguredOrganization(
                         source = ConfigSource.File,
                         id = provider.eapIdentityProvider?.firstOrNull()?.ID ?: ConfiguredOrganization.ID_ORGANIZATION_FROM_FILE,
