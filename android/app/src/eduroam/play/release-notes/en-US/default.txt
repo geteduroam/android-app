@@ -1,3 +1,5 @@
-Release notes for version 2.3.0 (2690)
+Release notes for version 2.3.0 (2692)
 ================================
-97714ea Merge pull request #177 from geteduroam/#176-SDK-Upgrade
+edcc358 Merge pull request #179 from geteduroam/bugfix/passpoint-suggestion-invalid-config
+9890c4b Merge pull request #178 from geteduroam/chore/firebase-and-deps-upgrade
+91ec31d Merge pull request #180 from geteduroam/bugfix/eap-config-import-oom
