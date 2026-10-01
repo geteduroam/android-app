@@ -1,7 +1,7 @@
 geteduroam Android app
 =================
 
-This is the repository for the a geteduroam Android project.
+These are the [geteduroam](https://geteduroam.app/) and getgovroam apps for Android Devices. Their purposes are to help people configure their devices for use with the [eduroam](https://eduroam.org) and [govroam](https://govroam.nl) networks. The eduroam and govroam networks allows them use the network at their organization of education or government or when visiting other participating organizations.
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
