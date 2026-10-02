@@ -36,6 +36,9 @@ fun EAPIdentityProviderList.buildAllNetworkSuggestions(): List<WifiNetworkSugges
  * This will return one suggestion per SSID.  The resulting list is generated on the fly,
  * and may be safely modified by the caller.
  *
+ * If the system rejects the enterprise configuration (for example because the profile has no
+ * server certificate or server name to validate against), this function returns an empty list.
+ *
  * @return List of network suggestions, one per SSID
  * @see this.buildPasspointSuggestion
  * @see this.buildNetworkRequests
@@ -46,12 +49,17 @@ fun EAPIdentityProviderList.buildSSIDSuggestions(): List<WifiNetworkSuggestion> 
     val ssids = eapIdentityProvider?.credentialApplicability?.map { it.ssid } ?: listOf()
     // Initial capacity = amount of SSIDs + 1, to keep room for a a Passpoint configuration
     val enterpriseConfig = buildEnterpriseConfig()
-    return ssids.filterNotNull().map { ssid ->
-        WifiNetworkSuggestion.Builder()
-            .setSsid((ssid))
-            .setWpa2EnterpriseConfig(enterpriseConfig)
-            .setIsAppInteractionRequired(true)
-            .build()
+    return try {
+        ssids.filterNotNull().map { ssid ->
+            WifiNetworkSuggestion.Builder()
+                .setSsid((ssid))
+                .setWpa2EnterpriseConfig(enterpriseConfig)
+                .setIsAppInteractionRequired(true)
+                .build()
+        }
+    } catch (ex: IllegalArgumentException) {
+        Timber.w(ex, "Not creating SSID suggestions, system rejected the enterprise configuration as invalid")
+        emptyList()
     }
 }
 

@@ -151,8 +151,12 @@ class WifiConfigViewModel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.R)
     private fun handleAndroid11PhoneOrTablet(context: Context) {
         val suggestions = eapIdentityProviderList.buildSSIDSuggestions()
-        val intent = createSuggestionsIntent(suggestions = suggestions)
-        intentWithSuggestions.value = intent
+        if (suggestions.isEmpty() && expectedSsids().isNotEmpty()) {
+            progressMessage.value = SSID_SUGGESTIONS_REJECTED_MESSAGE
+        } else {
+            val intent = createSuggestionsIntent(suggestions = suggestions)
+            intentWithSuggestions.value = intent
+        }
         val passPointSuggestion = eapIdentityProviderList.buildPasspointSuggestion()
         if (passPointSuggestion != null) {
             removeNetworks(context)
@@ -215,19 +219,24 @@ class WifiConfigViewModel @Inject constructor(
         val ssidSuggestions = eapIdentityProviderList.buildSSIDSuggestions()
         val wifiManager: WifiManager =
             context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        val ssids = eapIdentityProviderList.eapIdentityProvider?.firstOrNull()?.credentialApplicability?.mapNotNull { it.ssid } ?: emptyList()
-        removeNetworks(context, *ssids.toTypedArray())
+        val ssids = expectedSsids()
 
-        try {
-            val status = wifiManager.addNetworkSuggestions(ssidSuggestions)
-            if (status != 0) {
-                Timber.w("Status for adding network: $status")
-            } else {
-                Timber.i("Successfully added network.")
+        if (ssidSuggestions.isEmpty() && ssids.isNotEmpty()) {
+            // Keep any previously installed networks, we have nothing to replace them with
+            progressMessage.value = SSID_SUGGESTIONS_REJECTED_MESSAGE
+        } else {
+            removeNetworks(context, *ssids.toTypedArray())
+            try {
+                val status = wifiManager.addNetworkSuggestions(ssidSuggestions)
+                if (status != 0) {
+                    Timber.w("Status for adding network: $status")
+                } else {
+                    Timber.i("Successfully added network.")
+                }
+            } catch (e: Exception) {
+                progressMessage.value = "Failed to add WiFi Suggestions. Exception: ${e.message}"
+                Timber.w(e, "Failed to add network suggestion")
             }
-        } catch (e: Exception) {
-            progressMessage.value = "Failed to add WiFi Suggestions. Exception: ${e.message}"
-            Timber.w(e, "Failed to add network suggestion")
         }
 
         val passpointConfig = eapIdentityProviderList.buildPasspointConfig()
@@ -279,6 +288,9 @@ class WifiConfigViewModel @Inject constructor(
     ) == PackageManager.PERMISSION_GRANTED
 
     @RequiresApi(Build.VERSION_CODES.R)
+    private fun expectedSsids(): List<String> =
+        eapIdentityProviderList.eapIdentityProvider?.firstOrNull()?.credentialApplicability?.mapNotNull { it.ssid } ?: emptyList()
+
     private fun createSuggestionsIntent(suggestions: List<WifiNetworkSuggestion>?): Intent {
         val forBundle = ArrayList<WifiNetworkSuggestion>()
         if (suggestions != null) {
@@ -354,4 +366,8 @@ class WifiConfigViewModel @Inject constructor(
         }
     }
 
+    companion object {
+        private const val SSID_SUGGESTIONS_REJECTED_MESSAGE =
+            "Failed to add WiFi network. Android rejected this profile because it does not specify a server certificate and server name to validate. Please contact your institution."
+    }
 }
