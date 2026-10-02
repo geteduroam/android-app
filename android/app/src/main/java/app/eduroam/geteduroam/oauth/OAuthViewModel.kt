@@ -315,7 +315,7 @@ class OAuthViewModel @Inject constructor(
     }
 
     private suspend fun recreateAuthorizationService(context: Context) {
-        service?.dispose()
+        disposeAuthorizationService()
         service = AuthenticationAssistant.createAuthorizationService(context)
         repository.saveCurrentAuthRequest(null)
     }
@@ -449,7 +449,17 @@ class OAuthViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        service?.dispose()
+        disposeAuthorizationService()
+    }
+
+    private fun disposeAuthorizationService() {
+        try {
+            service?.dispose()
+        } catch (ex: IllegalArgumentException) {
+            // AppAuth unbinds its Custom Tabs service here, which throws "Service not registered"
+            // if that binding is already gone (for example when the Activity context was destroyed)
+            Timber.w(ex, "Could not dispose AuthorizationService, service was already unbound")
+        }
     }
 
     fun didGoToNextScreen() {
