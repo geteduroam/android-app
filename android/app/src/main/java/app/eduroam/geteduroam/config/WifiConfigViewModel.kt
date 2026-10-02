@@ -144,6 +144,12 @@ class WifiConfigViewModel @Inject constructor(
     private fun handleAndroid11ChromeOs() {
         // We don't remove networks here, because networks added by an intent cannot be removed.
         val suggestions = eapIdentityProviderList.buildAllNetworkSuggestions()
+        if (suggestions.isEmpty() && expectedSsids().isNotEmpty()) {
+            // The SSID suggestions were rejected and there is no Passpoint fallback, so there is nothing to add
+            progressMessage.value = SSID_SUGGESTIONS_REJECTED_MESSAGE
+            processing.value = false
+            return
+        }
         val intent = createSuggestionsIntent(suggestions = suggestions)
         intentWithSuggestions.value = intent
     }
@@ -287,10 +293,10 @@ class WifiConfigViewModel @Inject constructor(
         context, Manifest.permission.CHANGE_WIFI_STATE
     ) == PackageManager.PERMISSION_GRANTED
 
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun expectedSsids(): List<String> =
         eapIdentityProviderList.eapIdentityProvider?.firstOrNull()?.credentialApplicability?.mapNotNull { it.ssid } ?: emptyList()
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun createSuggestionsIntent(suggestions: List<WifiNetworkSuggestion>?): Intent {
         val forBundle = ArrayList<WifiNetworkSuggestion>()
         if (suggestions != null) {
@@ -368,6 +374,6 @@ class WifiConfigViewModel @Inject constructor(
 
     companion object {
         private const val SSID_SUGGESTIONS_REJECTED_MESSAGE =
-            "Failed to add WiFi network. Android rejected this profile because it does not specify a server certificate and server name to validate. Please contact your institution."
+            "Failed to add WiFi network. Android rejected the network configuration of this profile. Please contact your institution."
     }
 }

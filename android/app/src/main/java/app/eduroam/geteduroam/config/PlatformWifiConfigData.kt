@@ -36,8 +36,9 @@ fun EAPIdentityProviderList.buildAllNetworkSuggestions(): List<WifiNetworkSugges
  * This will return one suggestion per SSID.  The resulting list is generated on the fly,
  * and may be safely modified by the caller.
  *
- * If the system rejects the enterprise configuration (for example because the profile has no
- * server certificate or server name to validate against), this function returns an empty list.
+ * If the system rejects the configuration (for example because the profile has no server
+ * certificate or server name to validate against, or an SSID is invalid), this function
+ * returns an empty list.
  *
  * @return List of network suggestions, one per SSID
  * @see this.buildPasspointSuggestion
@@ -58,7 +59,7 @@ fun EAPIdentityProviderList.buildSSIDSuggestions(): List<WifiNetworkSuggestion> 
                 .build()
         }
     } catch (ex: IllegalArgumentException) {
-        Timber.w(ex, "Not creating SSID suggestions, system rejected the enterprise configuration as invalid")
+        Timber.w(ex, "Not creating SSID suggestions, system rejected the configuration as invalid")
         emptyList()
     }
 }
