@@ -201,10 +201,11 @@ sealed class Route {
     ): Route() {
         companion object {
             suspend fun buildDeepLink(context: Context, fileUri: Uri): ConfigureWifi? = withContext(Dispatchers.IO) {
-                val inputStream = context.contentResolver.openInputStream(fileUri) ?: return@withContext null
-                val bytes = inputStream.readBytes()
                 val configParser = AndroidConfigParser()
                 return@withContext try {
+                    // Opening can throw (e.g. FileNotFoundException) when the file behind the URI is gone
+                    val inputStream = context.contentResolver.openInputStream(fileUri) ?: return@withContext null
+                    val bytes = inputStream.use { it.readBytes() }
                     val provider = configParser.parse(bytes)
                     ConfigureWifi(ConfiguredOrganization(
                         source = ConfigSource.File,
