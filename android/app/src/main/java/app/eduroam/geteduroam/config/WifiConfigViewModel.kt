@@ -157,9 +157,8 @@ class WifiConfigViewModel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.R)
     private fun handleAndroid11PhoneOrTablet(context: Context) {
         val suggestions = eapIdentityProviderList.buildSSIDSuggestions()
-        if (suggestions.isEmpty() && expectedSsids().isNotEmpty()) {
-            progressMessage.value = SSID_SUGGESTIONS_REJECTED_MESSAGE
-        } else {
+        val ssidsRejected = suggestions.isEmpty() && expectedSsids().isNotEmpty()
+        if (!ssidsRejected) {
             val intent = createSuggestionsIntent(suggestions = suggestions)
             intentWithSuggestions.value = intent
         }
@@ -181,6 +180,10 @@ class WifiConfigViewModel @Inject constructor(
                 }
                 Timber.w(e, "Failed to add network suggestion")
             }
+        }
+        if (ssidsRejected && passPointSuggestion == null) {
+            // Only report the rejected SSIDs as a failure when there is no Passpoint network to fall back on
+            progressMessage.value = SSID_SUGGESTIONS_REJECTED_MESSAGE
         }
         processing.value = false
     }
@@ -226,11 +229,10 @@ class WifiConfigViewModel @Inject constructor(
         val wifiManager: WifiManager =
             context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val ssids = expectedSsids()
+        val ssidsRejected = ssidSuggestions.isEmpty() && ssids.isNotEmpty()
 
-        if (ssidSuggestions.isEmpty() && ssids.isNotEmpty()) {
-            // Keep any previously installed networks, we have nothing to replace them with
-            progressMessage.value = SSID_SUGGESTIONS_REJECTED_MESSAGE
-        } else {
+        // When the SSIDs are rejected, keep any previously installed networks, we have nothing to replace them with
+        if (!ssidsRejected) {
             removeNetworks(context, *ssids.toTypedArray())
             try {
                 val status = wifiManager.addNetworkSuggestions(ssidSuggestions)
@@ -257,6 +259,10 @@ class WifiConfigViewModel @Inject constructor(
             }
             Timber.w(e, "Failed to add or update Passpoint config")
 
+        }
+        if (ssidsRejected && passpointConfig == null) {
+            // Only report the rejected SSIDs as a failure when there is no Passpoint network to fall back on
+            progressMessage.value = SSID_SUGGESTIONS_REJECTED_MESSAGE
         }
         processing.value = false
     }
