@@ -12,6 +12,7 @@ protobuf = "3.23.0"
 kotlin-gradle-plugin = "2.3.20"
 ksp-plugin = "2.3.10" #NB: ksp version must be compatible with kotlin
 firebase-bom="34.17.0"
+ben-manes-versions-plugin = "0.66.0"
 firebase-app-distribution-plugin = "5.3.0"
 firebase-crashlytics-gradle = "3.0.7"
 protobuf-plugin = "0.9.3"
@@ -92,6 +93,7 @@ serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref 
 google-gms-gradle = { id = "com.google.gms.google-services", version.ref = "google-services-plugin" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }
 play-publisher = { id = "com.github.triplet.play", version.ref = "play-publisher-plugin"}
+ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "ben-manes-versions-plugin" }
 firebase-appdistribution = { id = "com.google.firebase.appdistribution", version.ref = "firebase-app-distribution-plugin" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics-gradle" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-gradle-plugin" }
