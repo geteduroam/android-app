@@ -16,7 +16,7 @@ ben-manes-versions-plugin = "0.66.0"
 firebase-app-distribution-plugin = "5.3.0"
 firebase-crashlytics-gradle = "3.0.8"
 protobuf-plugin = "0.9.3"
-play-publisher-plugin = "3.8.6"
+play-publisher-plugin = "3.13.0"
 compose-navigation = "2.9.8"
 workmanager = "2.12.0"
 
