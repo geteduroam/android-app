@@ -195,4 +195,6 @@ dependencies {
     //Compose debug/tool preview
     debugImplementation(libs.androidx.compose.debug.ui.tooling)
     debugImplementation(libs.androidx.compose.debug.ui.test.manifest)
+
+    testImplementation(libs.junit)
 }
