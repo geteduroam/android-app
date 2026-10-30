@@ -338,13 +338,34 @@ private fun EAPIdentityProvider.getPhase2AuthType(eapMethod: Int): Int? {
         return getInnerAuthMethod(0)
     } else {
         val validAuthMethod = authenticationMethod?.bestMethod()
-        val innerNonEapMethod = validAuthMethod?.innerAuthenticationMethod?.nonEapMethod?.type?.toInt()?.times(-1)
-        val innerEapMethod = validAuthMethod?.innerAuthenticationMethod?.eapMethod?.type?.toInt()
+        val rawNonEapType = validAuthMethod?.innerAuthenticationMethod?.nonEapMethod?.type
+        val innerNonEapMethod = parseNonEapAuthType(rawNonEapType)
+        if (rawNonEapType != null && innerNonEapMethod == null) {
+            Timber.w("Unknown inner non-EAP auth type '$rawNonEapType' in provider $ID")
+        }
+        val innerEapMethod = validAuthMethod?.innerAuthenticationMethod?.eapMethod?.type?.toIntOrNull()
         return if (innerEapMethod != null && innerEapMethod != 0) {
             getInnerAuthMethod(innerEapMethod)
         } else {
-            getInnerAuthMethod(innerNonEapMethod)
+            innerNonEapMethod
         }
+    }
+}
+
+/**
+ * Converts the Type of a NonEAPAuthMethod to an Android Phase2 integer.
+ *
+ * A numeric type goes through [getInnerAuthMethod], like every other inner type. Crashlytics issue
+ * ff08450d showed a file with the text "PAP" there instead, so that name is accepted too.
+ *
+ * @return ENUM from WifiEnterpriseConfig.Phase2, or null if the value is not recognised
+ */
+internal fun parseNonEapAuthType(type: String?): Int? {
+    val trimmed = type?.trim() ?: return null
+    trimmed.toIntOrNull()?.let { return getInnerAuthMethod(it * -1) }
+    return when (trimmed.uppercase()) {
+        "PAP" -> WifiEnterpriseConfig.Phase2.PAP
+        else -> null
     }
 }
 
