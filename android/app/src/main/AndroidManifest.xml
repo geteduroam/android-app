@@ -33,7 +33,6 @@
             <intent-filter>
                 <data
                     android:mimeType="application/eap-config"
-                    android:pathPattern=".*\\.eap-config"
                     android:scheme="content" />
                 <action android:name="android.intent.action.VIEW" />
 
@@ -42,7 +41,15 @@
             </intent-filter>
             <intent-filter>
                 <data
-                    android:mimeType="application/octet-stream"
+                    android:mimeType="application/x-eap-config"
+                    android:scheme="content" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+            <intent-filter>
+                <data
                     android:pathPattern=".*\\.eap-config"
                     android:scheme="content" />
                 <action android:name="android.intent.action.VIEW" />
