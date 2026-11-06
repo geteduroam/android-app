@@ -1,4 +1,4 @@
-Release notes for version 2.3.2 (2694)
+Release notes for version 2.3.2 (2696)
 ================================
-e076b83 Merge pull request #187 from geteduroam/bump
-4591375 Merge pull request #182 from geteduroam/recurring/dependencyUpgrades
+d94c45e Merge pull request #186 from geteduroam/bugfix/phase2-pap-parsing
+5d61551 Merge pull request #185 from geteduroam/bugfix/eap-config-oom
