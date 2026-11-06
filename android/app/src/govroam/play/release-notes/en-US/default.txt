@@ -1,3 +1,4 @@
-Release notes for version 2.3.1 (2693)
+Release notes for version 2.3.2 (2694)
 ================================
-6e7b0c3 Merge pull request #181 from geteduroam/bugfix/quickwin-crash-guards
+e076b83 Merge pull request #187 from geteduroam/bump
+4591375 Merge pull request #182 from geteduroam/recurring/dependencyUpgrades
