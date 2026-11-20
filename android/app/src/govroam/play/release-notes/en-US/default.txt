@@ -1,3 +1,4 @@
-Release notes for version 2.3.2 (2697)
+Release notes for version 2.3.3 (2698)
 ================================
-79c9b41 Merge pull request #183 from TreeNinjaPRO/main
+dadf244 Merge pull request #188 from geteduroam/bugfix/quickwin-crash-guards-2
+200295b Merge pull request #163 from sammyhori/patch-1
