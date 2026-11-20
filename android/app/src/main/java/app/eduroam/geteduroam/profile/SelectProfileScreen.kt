@@ -44,7 +44,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
+import android.content.Context
+import androidx.annotation.PluralsRes
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -80,6 +81,8 @@ import java.time.LocalDateTime
 import java.time.Period
 import java.time.ZoneOffset
 import java.util.Date
+import java.util.Locale
+import timber.log.Timber
 
 @Composable
 fun SelectProfileScreen(
@@ -375,7 +378,7 @@ fun SelectProfileContent(
             if (nowDate.isBefore(expiryDateTime)) {
                 isExpired = false
                 val duration = formatDuration(date1 = nowDate, date2 = expiryDateTime)
-                val dateFormatter = DateFormat.getDateInstance(DateFormat.LONG, configuration.locales[0])
+                val dateFormatter = DateFormat.getDateInstance(DateFormat.LONG, configuration.locales[0] ?: Locale.getDefault())
                 val dateString = dateFormatter.format(expiryDate)
                 Text(
                     text = AnnotatedString.fromHtml(stringResource(id = R.string.profile_status_account_valid_in_future, dateString, duration)),
@@ -384,7 +387,7 @@ fun SelectProfileContent(
             } else {
                 isExpired = true
                 val duration = formatDuration(date1 = expiryDateTime, date2 = nowDate)
-                val dateFormatter = DateFormat.getDateInstance(DateFormat.LONG, configuration.locales[0])
+                val dateFormatter = DateFormat.getDateInstance(DateFormat.LONG, configuration.locales[0] ?: Locale.getDefault())
                 val dateString = dateFormatter.format(expiryDate)
                 Text(
                     text = AnnotatedString.fromHtml(stringResource(id = R.string.profile_status_account_valid_in_past, dateString, duration)),
@@ -497,18 +500,38 @@ fun formatDuration(date1: LocalDateTime, date2: LocalDateTime): String {
     val hours = duration.toHours().toInt()
     val minutes = (duration.toMinutes() % 60).toInt()
     val seconds = (duration.seconds % 60).toInt()
-    return if (years > 0) {
-        "$years ${pluralStringResource(id = R.plurals.time_years, years)}"
-    } else if (months > 0) {
-        "$months ${pluralStringResource(id = R.plurals.time_months, months)}"
-    } else if (days > 0) {
-        "$days ${pluralStringResource(id = R.plurals.time_days, days)}"
-    } else if (hours > 0) {
-        "$hours ${pluralStringResource(id = R.plurals.time_hours, hours)}"
-    } else if (minutes > 0) {
-        "$minutes ${pluralStringResource(id = R.plurals.time_minutes, minutes)}"
-    } else {
-        "$seconds ${pluralStringResource(id = R.plurals.time_seconds, seconds)}"
+    val (pluralId, count) = when {
+        years > 0 -> R.plurals.time_years to years
+        months > 0 -> R.plurals.time_months to months
+        days > 0 -> R.plurals.time_days to days
+        hours > 0 -> R.plurals.time_hours to hours
+        minutes > 0 -> R.plurals.time_minutes to minutes
+        else -> R.plurals.time_seconds to seconds
+    }
+    // Read the configuration so this recomposes when the locale changes
+    LocalConfiguration.current
+    val context = LocalContext.current
+    return "$count ${quantityStringOrFallback(context, pluralId, count)}".trimEnd()
+}
+
+/**
+ * Some ROMs (seen on HONOR, Android 15) report a configuration without a usable locale,
+ * which makes the plural lookup throw a NullPointerException on ULocale.getBaseName().
+ * Retry with the default locale, and fall back to an empty unit if that fails too.
+ */
+private fun quantityStringOrFallback(context: Context, @PluralsRes id: Int, count: Int): String {
+    return try {
+        context.resources.getQuantityString(id, count)
+    } catch (e: NullPointerException) {
+        Timber.w(e, "Plural lookup failed, retrying with the default locale")
+        try {
+            val config = android.content.res.Configuration(context.resources.configuration)
+            config.setLocale(Locale.getDefault())
+            context.createConfigurationContext(config).resources.getQuantityString(id, count)
+        } catch (e: NullPointerException) {
+            Timber.w(e, "Plural lookup failed with the default locale too")
+            ""
+        }
     }
 }
 
