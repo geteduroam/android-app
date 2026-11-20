@@ -79,6 +79,9 @@ fun UsernamePasswordDialog(
     }
 
     fun checkLoginDetailsValidity() {
+        // Mobile keyboards may append a trailing space after accepting an autocomplete
+        // suggestion (see issue #109), so trim it before validating or logging in.
+        val username = username.trim()
         if (!requiredSuffix.isNullOrEmpty() && !username.endsWith(requiredSuffix, ignoreCase = false)) {
             if (enforceRequiredSuffix) {
                 usernameError = requiredSuffixError
@@ -125,7 +128,7 @@ fun UsernamePasswordDialog(
                             }
                             .onFocusChanged { focusState ->
                                 if (!focusState.isFocused && requireSuffix) {
-                                    username += "@$requiredSuffix"
+                                    username = username.trim() + "@$requiredSuffix"
                                 }
                             },
                         value = username,
