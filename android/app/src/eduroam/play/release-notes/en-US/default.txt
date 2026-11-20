@@ -1,4 +1,3 @@
-Release notes for version 2.3.2 (2696)
+Release notes for version 2.3.2 (2697)
 ================================
-d94c45e Merge pull request #186 from geteduroam/bugfix/phase2-pap-parsing
-5d61551 Merge pull request #185 from geteduroam/bugfix/eap-config-oom
+79c9b41 Merge pull request #183 from TreeNinjaPRO/main
