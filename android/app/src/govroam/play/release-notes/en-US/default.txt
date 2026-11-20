@@ -1,4 +1,4 @@
-Release notes for version 2.3.3 (2698)
+Release notes for version 2.3.3 (2699)
 ================================
 dadf244 Merge pull request #188 from geteduroam/bugfix/quickwin-crash-guards-2
 200295b Merge pull request #163 from sammyhori/patch-1
