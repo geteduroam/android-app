@@ -130,7 +130,15 @@ class WifiConfigViewModel @Inject constructor(
     private fun removeNetworks(context: Context, vararg ssids: String) {
         val wifiManager: WifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         if (ssids.isNotEmpty() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val suggestions: MutableList<WifiNetworkSuggestion> = wifiManager.networkSuggestions
+            val suggestions: List<WifiNetworkSuggestion> = try {
+                wifiManager.networkSuggestions
+            } catch (e: Exception) {
+                // Some OPPO/OnePlus ROMs return a proprietary parcelable class
+                // (OplusWifiConfiguration) that the app cannot unparcel
+                Timber.w(e, "Could not read existing network suggestions, removing all instead")
+                removeNetworks(context)
+                return
+            }
             val suggestionsToRemove = suggestions.filterNot { suggestion ->
                 ssids.contains(suggestion.ssid)
             }

@@ -4,6 +4,7 @@
  */
 package app.eduroam.geteduroam.ui
 
+import android.content.ActivityNotFoundException
 import android.os.Build
 import android.text.SpannableString
 import android.text.style.URLSpan
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
+import timber.log.Timber
 
 @Composable
 fun LinkifyText(
@@ -89,7 +91,15 @@ fun LinkifyText(
                     if (linkEntire) {
                         onClickLink?.invoke(annotatedString.substring(result.start, result.end))
                     } else {
-                        uriHandler.openUri(result.item)
+                        try {
+                            uriHandler.openUri(result.item)
+                        } catch (e: ActivityNotFoundException) {
+                            // For example a mailto: link on a device without an email app
+                            Timber.w(e, "No app can open the link")
+                        } catch (e: IllegalArgumentException) {
+                            // Newer Compose versions wrap ActivityNotFoundException in this
+                            Timber.w(e, "No app can open the link")
+                        }
                         onClickLink?.invoke(annotatedString.substring(result.start, result.end))
                     }
                 }
